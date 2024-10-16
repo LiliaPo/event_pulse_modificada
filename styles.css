@@ -1,0 +1,597 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+.container {
+    width: 80%;
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #2c3e50;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filters select, .filters input {
+    flex: 1 1 200px;
+    max-width: 200px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+#ubicacionActual {
+    flex: 1 1 200px;
+    max-width: 200px;
+}
+
+select, input, button {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+.eventos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    padding: 20px;
+}
+
+.evento {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 20px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.evento:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.evento h3 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 1.2em;
+}
+
+.evento-banner {
+    height: 150px;
+    background-size: cover;
+    background-position: center;
+    margin: -20px -20px 15px -20px;
+    border-radius: 10px 10px 0 0;
+}
+
+.evento-categoria {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: white;
+}
+
+.evento-icono {
+    font-size: 1.5em;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.btn-ver-mas {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+    display: block;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.btn-ver-mas:hover {
+    background-color: #2980b9;
+}
+
+.portada {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.evento-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 10px;
+    padding: 10px;
+}
+
+.evento-item {
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+.evento-item:hover {
+    transform: scale(1.05);
+}
+
+.portada-contenido {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 2rem;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 1;
+    position: relative;
+}
+
+.portada h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.portada p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    color: white;
+}
+
+.btn-agregar {
+    display: block;
+    width: 200px;
+    margin: 20px auto;
+    padding: 10px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-agregar:hover {
+    background-color: #27ae60;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-contenido {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.cerrar {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.cerrar:hover,
+.cerrar:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.categoria-opciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.categoria-opciones label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.categoria-opciones label:hover {
+    background-color: #f0f0f0;
+}
+
+.categoria-opciones img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+.categoria-opciones input[type="radio"]:checked + img {
+    border: 3px solid #3498db;
+}
+
+.personas-similares {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.persona-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 20px;
+    text-align: center;
+}
+
+.persona-card img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.persona-card .contacto {
+    margin-top: 10px;
+}
+
+.persona-card .contacto a {
+    display: inline-block;
+    margin: 5px;
+    color: #3498db;
+    text-decoration: none;
+}
+
+.btn-perfil {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-perfil i {
+    font-size: 1.2em;
+}
+
+#ventanaPerfil .modal-contenido {
+    max-width: 500px;
+}
+
+#perfilForm {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.formas-contacto {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.formas-contacto label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#nuevoEventoForm {
+    display: grid;
+    gap: 15px;
+}
+
+#nuevoEventoForm input,
+#nuevoEventoForm select,
+#nuevoEventoForm textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+#nuevoEventoForm button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+#nuevoEventoForm button:hover {
+    background-color: #2980b9;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+nav button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+nav button:hover {
+    background-color: #2980b9;
+}
+
+#perfilUsuario {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+#perfilForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#perfilForm input,
+#perfilForm button {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#perfilForm button {
+    background-color: #2ecc71;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#perfilForm button:hover {
+    background-color: #27ae60;
+}
+
+.personas-similares {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.persona-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 20px;
+    text-align: center;
+}
+
+.persona-card img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.persona-card .contacto {
+    margin-top: 10px;
+}
+
+.persona-card .contacto a {
+    display: inline-block;
+    margin: 5px;
+    color: #3498db;
+    text-decoration: none;
+}
+
+.btn-perfil {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-perfil i {
+    font-size: 1.2em;
+}
+
+#ventanaPerfil .modal-contenido {
+    max-width: 500px;
+}
+
+#perfilForm {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.formas-contacto {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.formas-contacto label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.foto-perfil-nav {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+.foto-perfil-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.btn-foro {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-foro:hover {
+    background-color: #2980b9;
+}
+
+#ventanaForo .modal-contenido {
+    max-width: 600px;
+}
+
+#chatForo {
+    height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#formMensaje {
+    display: flex;
+    gap: 10px;
+}
+
+#mensajeChat {
+    flex-grow: 1;
+}
+
+/* Estilos para los colores de categoría */
+.categoria-musica { background-color: #e74c3c; }
+.categoria-deporte { background-color: #2ecc71; }
+.categoria-arte { background-color: #f39c12; }
+.categoria-cine { background-color: #9b59b6; }
+.categoria-cafeteria { background-color: #e67e22; }
+.categoria-restaurante { background-color: #3498db; }
+
+@media (max-width: 768px) {
+    .filters {
+        flex-direction: column;
+    }
+
+    .filters select, .filters input, #ubicacionActual {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+
+    .eventos {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-contenido {
+        width: 95%;
+        margin: 5% auto;
+    }
+}
+
+/* Animación para la carga de eventos */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 40px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.evento {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+#mapa {
+    height: 300px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto 20px auto;
+    border-radius: 10px;
+    overflow: hidden;
+}
