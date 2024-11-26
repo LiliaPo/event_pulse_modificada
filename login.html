@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - EventosApp</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <h2>Iniciar Sesión</h2>
+        <form id="loginForm" class="auth-form">
+            <div class="form-group">
+                <label for="usernameLogin">Nombre de usuario:</label>
+                <input type="text" id="usernameLogin" required>
+            </div>
+            <div class="form-group">
+                <label for="emailLogin">Email:</label>
+                <input type="email" id="emailLogin" required>
+            </div>
+            <div class="form-group">
+                <label for="passwordLogin">Contraseña:</label>
+                <input type="password" id="passwordLogin" required>
+            </div>
+            <button type="submit" class="btn-primary">Iniciar Sesión</button>
+        </form>
+        <p>¿No tienes una cuenta? <a href="registro.html">Regístrate aquí</a></p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 

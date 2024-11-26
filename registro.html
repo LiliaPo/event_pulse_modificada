@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - EventosApp</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <h2>Registro</h2>
+        <form id="registroForm" class="auth-form">
+            <div class="form-group">
+                <label for="nombreRegistro">Nombre completo:</label>
+                <input type="text" id="nombreRegistro" required>
+            </div>
+            <div class="form-group">
+                <label for="usernameRegistro">Nombre de usuario:</label>
+                <input type="text" id="usernameRegistro" required>
+            </div>
+            <div class="form-group">
+                <label for="emailRegistro">Email:</label>
+                <input type="email" id="emailRegistro" required>
+            </div>
+            <div class="form-group">
+                <label for="passwordRegistro">Contraseña:</label>
+                <input type="password" id="passwordRegistro" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPasswordRegistro">Confirmar contraseña:</label>
+                <input type="password" id="confirmPasswordRegistro" required>
+            </div>
+            <button type="submit" class="btn-primary">Registrarse</button>
+        </form>
+        <p>¿Ya tienes una cuenta? <a href="login.html">Inicia sesión aquí</a></p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 

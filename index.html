@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 </head>
 <body>
     <div class="portada" id="portada">
@@ -23,23 +22,74 @@
         <div class="portada-contenido">
             <h1>Bienvenido a EventosFiltro</h1>
             <p>Descubre los mejores eventos adaptados a tus preferencias</p>
-            <button id="entrar">Entrar</button>
+            <div class="auth-buttons">
+                <a href="/login" class="btn-auth">Iniciar Sesión</a>
+                <a href="/registro" class="btn-auth">Registrarse</a>
+                <button class="btn-auth btn-guest">Entrar como Invitado</button>
+            </div>
         </div>
     </div>
+
     <div class="container" id="contenido" style="display: none;">
         <nav>
             <button id="mostrarPerfil" class="btn-perfil">
                 <img id="imagenPerfilNav" src="https://via.placeholder.com/40" alt="Foto de perfil" class="foto-perfil-nav">
                 Mi Perfil
             </button>
-            <!-- Se ha eliminado el botón de eventos -->
         </nav>
 
         <div id="seccionEventos">
             <h1>Filtro de Eventos</h1>
-            <div class="filters">
-                <select id="categoria">
-                    <option value="">Todas las categorías</option>
+            <div class="filters-container">
+                <div class="filters">
+                    <select id="categoria">
+                        <option value="">Todas las categorías</option>
+                        <option value="musica">Música</option>
+                        <option value="deporte">Deporte</option>
+                        <option value="arte">Arte</option>
+                        <option value="cine">Cine</option>
+                        <option value="cafeteria">Cafetería</option>
+                        <option value="restaurante">Restaurante</option>
+                    </select>
+                    <select id="subcategoria">
+                        <option value="">Todas las subcategorías</option>
+                    </select>
+                    <select id="edad">
+                        <option value="">Todos los grupos de edad</option>
+                        <option value="niños">Niños</option>
+                        <option value="jovenes">Jóvenes</option>
+                        <option value="adultos">Adultos</option>
+                        <option value="tercera_edad">Tercera edad</option>
+                        <option value="todas_las_edades">Todas las edades</option>
+                    </select>
+                    <input type="number" id="personasMin" placeholder="Mín. personas" min="1">
+                    <input type="number" id="personasMax" placeholder="Máx. personas" min="1">
+                    <input type="text" id="localizacion" placeholder="Localización">
+                    <input type="date" id="fechaEventoInicio" placeholder="Fecha inicio">
+                    <input type="date" id="fechaEventoFin" placeholder="Fecha fin">
+                    <button id="ubicacionActual">Usar ubicación actual</button>
+                    <button id="filtrar">Filtrar</button>
+                </div>
+                <button id="abrirFormulario" class="btn-agregar">Añadir Nuevo Evento</button>
+            </div>
+
+            <div id="mapa"></div>
+            <div id="eventos" class="eventos"></div>
+            
+            <h2>Personas con Eventos Similares</h2>
+            <div id="personasSimilares" class="personas-similares"></div>
+        </div>
+    </div>
+
+    <!-- Modal para añadir evento -->
+    <div id="formularioEvento" class="modal">
+        <div class="modal-contenido">
+            <span class="cerrar">&times;</span>
+            <h2>Añadir Nuevo Evento</h2>
+            <form id="nuevoEventoForm">
+                <input type="text" id="nuevoNombre" placeholder="Nombre del evento" required>
+                <select id="nuevoCategoria" required>
+                    <option value="">Selecciona categoría</option>
                     <option value="musica">Música</option>
                     <option value="deporte">Deporte</option>
                     <option value="arte">Arte</option>
@@ -47,126 +97,8 @@
                     <option value="cafeteria">Cafetería</option>
                     <option value="restaurante">Restaurante</option>
                 </select>
-                <select id="subcategoria">
-                    <option value="">Todas las subcategorías</option>
-                    <optgroup label="Música">
-                        <option value="rock">Rock</option>
-                        <option value="pop">Pop</option>
-                        <option value="jazz">Jazz</option>
-                        <option value="clasica">Clásica</option>
-                        <option value="electronica">Electrónica</option>
-                        <option value="hip-hop">Hip Hop</option>
-                        <option value="reggae">Reggae</option>
-                    </optgroup>
-                    <optgroup label="Deporte">
-                        <option value="futbol">Fútbol</option>
-                        <option value="baloncesto">Baloncesto</option>
-                        <option value="tenis">Tenis</option>
-                        <option value="natacion">Natación</option>
-                        <option value="atletismo">Atletismo</option>
-                        <option value="ciclismo">Ciclismo</option>
-                        <option value="yoga">Yoga</option>
-                    </optgroup>
-                    <optgroup label="Arte">
-                        <option value="pintura">Pintura</option>
-                        <option value="escultura">Escultura</option>
-                        <option value="fotografia">Fotografía</option>
-                        <option value="teatro">Teatro</option>
-                        <option value="danza">Danza</option>
-                        <option value="literatura">Literatura</option>
-                    </optgroup>
-                    <optgroup label="Cine">
-                        <option value="accion">Acción</option>
-                        <option value="comedia">Comedia</option>
-                        <option value="drama">Drama</option>
-                        <option value="ciencia-ficcion">Ciencia Ficción</option>
-                        <option value="terror">Terror</option>
-                        <option value="documental">Documental</option>
-                        <option value="animacion">Animación</option>
-                    </optgroup>
-                    <optgroup label="Cafetería">
-                        <option value="cafe-especialidad">Café Especialidad</option>
-                        <option value="te">Té</option>
-                        <option value="reposteria">Repostería</option>
-                        <option value="brunch">Brunch</option>
-                    </optgroup>
-                    <optgroup label="Restaurante">
-                        <option value="italiana">Italiana</option>
-                        <option value="japonesa">Japonesa</option>
-                        <option value="mexicana">Mexicana</option>
-                        <option value="vegetariana">Vegetariana</option>
-                        <option value="mariscos">Mariscos</option>
-                        <option value="parrilla">Parrilla</option>
-                        <option value="fusion">Fusión</option>
-                    </optgroup>
-                </select>
-                <select id="edad">
-                    <option value="">Todos los grupos de edad</option>
-                    <option value="niños">Niños</option>
-                    <option value="jovenes">Jóvenes</option>
-                    <option value="adultos">Adultos</option>
-                    <option value="tercera_edad">Tercera edad</option>
-                    <option value="todas_las_edades">Todas las edades</option>
-                </select>
-                <input type="number" id="personasMin" placeholder="Mín. personas" min="1">
-                <input type="number" id="personasMax" placeholder="Máx. personas" min="1">
-                <input type="text" id="localizacion" placeholder="Localización">
-                <input type="date" id="fechaEventoInicio" placeholder="Fecha inicio">
-                <input type="date" id="fechaEventoFin" placeholder="Fecha fin">
-                <button id="ubicacionActual">Usar ubicación actual</button>
-                <button id="filtrar">Filtrar</button>
-            </div>
-            <div id="mapa" style="height: 300px; margin-bottom: 20px;"></div>
-            <div id="eventos" class="eventos"></div>
-            
-            <button id="abrirFormulario" class="btn-agregar">Añadir Nuevo Evento</button>
-            
-            <h2>Personas con Eventos Similares</h2>
-            <div id="personasSimilares" class="personas-similares"></div>
-        </div>
-    </div>
-
-    <div id="formularioEvento" class="modal">
-        <div class="modal-contenido">
-            <span class="cerrar">&times;</span>
-            <h2>Añadir Nuevo Evento</h2>
-            <form id="nuevoEventoForm">
-                <input type="text" id="nuevoNombre" placeholder="Nombre del evento" required>
-                <div class="categoria-opciones">
-                    <label>
-                        <input type="radio" name="categoria" value="musica" required>
-                        <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Música">
-                        Música
-                    </label>
-                    <label>
-                        <input type="radio" name="categoria" value="deporte" required>
-                        <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Deporte">
-                        Deporte
-                    </label>
-                    <label>
-                        <input type="radio" name="categoria" value="arte" required>
-                        <img src="https://images.unsplash.com/photo-1536924940846-227afb31e2a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Arte">
-                        Arte
-                    </label>
-                    <label>
-                        <input type="radio" name="categoria" value="cine" required>
-                        <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Cine">
-                        Cine
-                    </label>
-                    <label>
-                        <input type="radio" name="categoria" value="cafeteria" required>
-                        <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Cafetería">
-                        Cafetería
-                    </label>
-                    <label>
-                        <input type="radio" name="categoria" value="restaurante" required>
-                        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Restaurante">
-                        Restaurante
-                    </label>
-                </div>
                 <select id="nuevoSubcategoria" required>
                     <option value="">Selecciona subcategoría</option>
-                    <!-- Las opciones se llenarán dinámicamente con JavaScript -->
                 </select>
                 <select id="nuevoEdad" required>
                     <option value="">Selecciona grupo de edad</option>
@@ -184,40 +116,8 @@
             </form>
         </div>
     </div>
-    <div id="ventanaPerfil" class="modal">
-        <div class="modal-contenido">
-            <span class="cerrar">&times;</span>
-            <h2>Mi Perfil</h2>
-            <img id="imagenPerfilPreview" src="https://via.placeholder.com/150" alt="Foto de perfil" class="foto-perfil-preview">
-            <form id="perfilForm">
-                <input type="text" id="nombreUsuario" placeholder="Nombre" required>
-                <input type="email" id="emailUsuario" placeholder="Email" required>
-                <input type="tel" id="telefonoUsuario" placeholder="Teléfono">
-                <input type="text" id="whatsappUsuario" placeholder="WhatsApp">
-                <input type="text" id="instagramUsuario" placeholder="Instagram">
-                <input type="file" id="imagenPerfil" accept="image/*">
-                <div class="formas-contacto">
-                    <label><input type="checkbox" name="contacto" value="email"> Email</label>
-                    <label><input type="checkbox" name="contacto" value="telefono"> Teléfono</label>
-                    <label><input type="checkbox" name="contacto" value="whatsapp"> WhatsApp</label>
-                    <label><input type="checkbox" name="contacto" value="instagram"> Instagram</label>
-                </div>
-                <button type="submit">Guardar Perfil</button>
-            </form>
-        </div>
-    </div>
-    <div id="ventanaForo" class="modal">
-        <div class="modal-contenido">
-            <span class="cerrar">&times;</span>
-            <h2 id="tituloEventoForo"></h2>
-            <div id="detallesEvento"></div>
-            <div id="chatForo"></div>
-            <form id="formMensaje">
-                <input type="text" id="mensajeChat" placeholder="Escribe un mensaje..." required>
-                <button type="submit">Enviar</button>
-            </form>
-        </div>
-    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
