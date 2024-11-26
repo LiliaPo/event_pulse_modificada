@@ -63,4 +63,43 @@ export class UserModel {
             throw new Error(`Error en la validación: ${error}`);
         }
     }
+
+    static async getUserById(id: string): Promise<User | null> {
+        const query = 'SELECT * FROM usuarios WHERE id = $1';
+        try {
+            const result = await pool.query(query, [id]);
+            return result.rows[0] || null;
+        } catch (error) {
+            throw new Error(`Error al obtener usuario: ${error}`);
+        }
+    }
+
+    static async updateUserProfile(id: string, userData: Partial<User>): Promise<User> {
+        const query = `
+            UPDATE usuarios 
+            SET 
+                telefono = COALESCE($1, telefono),
+                whatsapp = COALESCE($2, whatsapp),
+                instagram = COALESCE($3, instagram),
+                imagen_perfil = COALESCE($4, imagen_perfil),
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $5
+            RETURNING *
+        `;
+
+        const values = [
+            userData.telefono,
+            userData.whatsapp,
+            userData.instagram,
+            userData.imagen_perfil,
+            id
+        ];
+
+        try {
+            const result = await pool.query(query, values);
+            return result.rows[0];
+        } catch (error) {
+            throw new Error(`Error al actualizar perfil: ${error}`);
+        }
+    }
 } 
