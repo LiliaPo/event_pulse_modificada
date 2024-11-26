@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
-import userRoutes from './routes/user.routes';
+import userRoutes from './routes/userRoutes';
+import open from 'open';
 
 dotenv.config();
 
@@ -15,7 +16,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../')));
 
 // Rutas API
-app.use('/api', userRoutes);
+app.use('/api/users', userRoutes);
 
 // Rutas para las páginas
 app.get('/login', (req, res) => {
@@ -26,11 +27,16 @@ app.get('/registro', (req, res) => {
     res.sendFile(path.join(__dirname, '../registro.html'));
 });
 
+app.get('/guest', (req, res) => {
+    res.sendFile(path.join(__dirname, '../EventPulse/index.html'));
+});
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en puerto ${PORT}`);
+app.listen(PORT, async () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    await open(`http://localhost:${PORT}`);
 }); 

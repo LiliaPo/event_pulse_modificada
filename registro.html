@@ -5,9 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - EventosApp</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .password-requirements {
+            color: #ff6b6b;
+            font-size: 0.8em;
+            margin-top: 5px;
+            display: block;
+        }
+        .password-requirements ul {
+            margin: 5px 0 0 20px;
+            padding: 0;
+        }
+        .invalid-input {
+            border-color: #ff6b6b !important;
+        }
+    </style>
 </head>
 <body class="auth-page">
     <div class="auth-container">
+        <a href="/" style="position: absolute; top: 20px; left: 20px; color: #3498db; text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
         <h2>Registro</h2>
         <form id="registroForm" class="auth-form">
             <div class="form-group">
@@ -25,6 +45,15 @@
             <div class="form-group">
                 <label for="passwordRegistro">Contraseña:</label>
                 <input type="password" id="passwordRegistro" required>
+                <small class="password-requirements" id="passwordHint">
+                    La contraseña debe tener al menos:
+                    <ul>
+                        <li id="lengthCheck">8 caracteres</li>
+                        <li id="upperCheck">1 mayúscula</li>
+                        <li id="lowerCheck">1 minúscula</li>
+                        <li id="specialCheck">1 símbolo especial (@$!%*?&)</li>
+                    </ul>
+                </small>
             </div>
             <div class="form-group">
                 <label for="confirmPasswordRegistro">Confirmar contraseña:</label>
@@ -34,6 +63,58 @@
         </form>
         <p>¿Ya tienes una cuenta? <a href="login.html">Inicia sesión aquí</a></p>
     </div>
+    <script>
+        document.getElementById('passwordRegistro').addEventListener('input', function(e) {
+            const password = e.target.value;
+            const requirements = {
+                length: password.length >= 8,
+                upper: /[A-Z]/.test(password),
+                lower: /[a-z]/.test(password),
+                special: /[@$!%*?&]/.test(password)
+            };
+
+            // Actualizar el estilo del input
+            e.target.classList.toggle('invalid-input', !Object.values(requirements).every(Boolean));
+
+            // Actualizar los indicadores de requisitos
+            document.getElementById('lengthCheck').style.color = requirements.length ? '#4CAF50' : '#ff6b6b';
+            document.getElementById('upperCheck').style.color = requirements.upper ? '#4CAF50' : '#ff6b6b';
+            document.getElementById('lowerCheck').style.color = requirements.lower ? '#4CAF50' : '#ff6b6b';
+            document.getElementById('specialCheck').style.color = requirements.special ? '#4CAF50' : '#ff6b6b';
+        });
+
+        document.getElementById('registroForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userData = {
+                nombre: document.getElementById('nombreRegistro').value,
+                username: document.getElementById('usernameRegistro').value,
+                email: document.getElementById('emailRegistro').value,
+                password: document.getElementById('passwordRegistro').value
+            };
+
+            try {
+                const response = await fetch('/api/users/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.href = '/EventPulse/index.html';  // Redirección directa
+                } else {
+                    alert('Error en el registro: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al intentar registrarse');
+            }
+        });
+    </script>
     <script src="script.js"></script>
 </body>
 </html> 

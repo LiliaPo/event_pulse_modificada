@@ -12,99 +12,55 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.user = void 0;
+exports.UserModel = void 0;
+const database_1 = require("../config/database");
+const uuid_1 = require("uuid");
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const database_1 = __importDefault(require("../config/database"));
-class user {
-    static create(userData) {
+class UserModel {
+    static createUser(userData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { username, nombre, email, password } = userData;
-            const hashedPassword = yield bcrypt_1.default.hash(password, 10);
+            const userId = (0, uuid_1.v4)();
+            const hashedPassword = yield bcrypt_1.default.hash(userData.password, 10);
             const query = `
-            INSERT INTO ${this.tableName} (username, nombre, email, password)
-            VALUES ($1, $2, $3, $4)
-            RETURNING id, username, nombre, email
+            INSERT INTO usuarios (
+                id, email, nombre, telefono, whatsapp, instagram, imagen_perfil, rol
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            RETURNING *
         `;
+            const values = [
+                userId,
+                userData.email,
+                userData.nombre,
+                userData.telefono || null,
+                userData.whatsapp || null,
+                userData.instagram || null,
+                userData.imagen_perfil || null,
+                userData.rol || 'usuario'
+            ];
             try {
-                const result = yield database_1.default.query(query, [
-                    username,
-                    nombre,
-                    email,
-                    hashedPassword
-                ]);
+                const result = yield database_1.pool.query(query, values);
                 return result.rows[0];
             }
             catch (error) {
-                if (error instanceof Error) {
-                    throw new Error(`Error al crear usuario: ${error.message}`);
-                }
-                throw error;
+                throw new Error(`Error al crear usuario: ${error}`);
             }
         });
     }
-    static findByCredentials(credentials) {
+    static validateLogin(email, password) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { username, email, password } = credentials;
-            const query = `
-            SELECT id, username, nombre, email, password
-            FROM ${this.tableName}
-            WHERE username = $1 OR email = $2
-        `;
+            const query = 'SELECT * FROM usuarios WHERE email = $1';
             try {
-                const result = yield database_1.default.query(query, [username, email]);
-                if (result.rows.length === 0) {
-                    return null;
-                }
+                const result = yield database_1.pool.query(query, [email]);
                 const user = result.rows[0];
-                const isValidPassword = yield bcrypt_1.default.compare(password, user.password);
-                return isValidPassword ? user : null;
+                if (!user)
+                    return null;
+                const isValid = yield bcrypt_1.default.compare(password, user.password);
+                return isValid ? user : null;
             }
             catch (error) {
-                if (error instanceof Error) {
-                    throw new Error(`Error al buscar credenciales: ${error.message}`);
-                }
-                throw error;
-            }
-        });
-    }
-    static findByUsername(username) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const query = `
-            SELECT id, username, nombre, email, password
-            FROM ${this.tableName}
-            WHERE username = $1
-        `;
-            try {
-                const result = yield database_1.default.query(query, [username]);
-                return result.rows[0] || null;
-            }
-            catch (error) {
-                if (error instanceof Error) {
-                    throw new Error(`Error al buscar por username: ${error.message}`);
-                }
-                throw error;
-            }
-        });
-    }
-    static findByEmail(email) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const query = `
-            SELECT id, username, nombre, email, password
-            FROM ${this.tableName}
-            WHERE email = $1
-        `;
-            try {
-                const result = yield database_1.default.query(query, [email]);
-                return result.rows[0] || null;
-            }
-            catch (error) {
-                if (error instanceof Error) {
-                    throw new Error(`Error al buscar por email: ${error.message}`);
-                }
-                throw error;
+                throw new Error(`Error en la validación: ${error}`);
             }
         });
     }
 }
-exports.user = user;
-user.tableName = 'eventusers';
+exports.UserModel = UserModel;

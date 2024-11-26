@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 </head>
 <body>
     <div class="portada" id="portada">
@@ -22,102 +23,12 @@
         <div class="portada-contenido">
             <h1>Bienvenido a EventosFiltro</h1>
             <p>Descubre los mejores eventos adaptados a tus preferencias</p>
-            <div class="auth-buttons">
-                <a href="/login" class="btn-auth">Iniciar Sesión</a>
-                <a href="/registro" class="btn-auth">Registrarse</a>
-                <button class="btn-auth btn-guest">Entrar como Invitado</button>
+            <div class="buttons-container">
+                <a href="/login" class="btn-portada">Iniciar Sesión / Entrar</a>
+                <a href="EventPulse/index.html" class="btn-portada">Entrar como Invitado</a>
             </div>
         </div>
     </div>
-
-    <div class="container" id="contenido" style="display: none;">
-        <nav>
-            <button id="mostrarPerfil" class="btn-perfil">
-                <img id="imagenPerfilNav" src="https://via.placeholder.com/40" alt="Foto de perfil" class="foto-perfil-nav">
-                Mi Perfil
-            </button>
-        </nav>
-
-        <div id="seccionEventos">
-            <h1>Filtro de Eventos</h1>
-            <div class="filters-container">
-                <div class="filters">
-                    <select id="categoria">
-                        <option value="">Todas las categorías</option>
-                        <option value="musica">Música</option>
-                        <option value="deporte">Deporte</option>
-                        <option value="arte">Arte</option>
-                        <option value="cine">Cine</option>
-                        <option value="cafeteria">Cafetería</option>
-                        <option value="restaurante">Restaurante</option>
-                    </select>
-                    <select id="subcategoria">
-                        <option value="">Todas las subcategorías</option>
-                    </select>
-                    <select id="edad">
-                        <option value="">Todos los grupos de edad</option>
-                        <option value="niños">Niños</option>
-                        <option value="jovenes">Jóvenes</option>
-                        <option value="adultos">Adultos</option>
-                        <option value="tercera_edad">Tercera edad</option>
-                        <option value="todas_las_edades">Todas las edades</option>
-                    </select>
-                    <input type="number" id="personasMin" placeholder="Mín. personas" min="1">
-                    <input type="number" id="personasMax" placeholder="Máx. personas" min="1">
-                    <input type="text" id="localizacion" placeholder="Localización">
-                    <input type="date" id="fechaEventoInicio" placeholder="Fecha inicio">
-                    <input type="date" id="fechaEventoFin" placeholder="Fecha fin">
-                    <button id="ubicacionActual">Usar ubicación actual</button>
-                    <button id="filtrar">Filtrar</button>
-                </div>
-                <button id="abrirFormulario" class="btn-agregar">Añadir Nuevo Evento</button>
-            </div>
-
-            <div id="mapa"></div>
-            <div id="eventos" class="eventos"></div>
-            
-            <h2>Personas con Eventos Similares</h2>
-            <div id="personasSimilares" class="personas-similares"></div>
-        </div>
-    </div>
-
-    <!-- Modal para añadir evento -->
-    <div id="formularioEvento" class="modal">
-        <div class="modal-contenido">
-            <span class="cerrar">&times;</span>
-            <h2>Añadir Nuevo Evento</h2>
-            <form id="nuevoEventoForm">
-                <input type="text" id="nuevoNombre" placeholder="Nombre del evento" required>
-                <select id="nuevoCategoria" required>
-                    <option value="">Selecciona categoría</option>
-                    <option value="musica">Música</option>
-                    <option value="deporte">Deporte</option>
-                    <option value="arte">Arte</option>
-                    <option value="cine">Cine</option>
-                    <option value="cafeteria">Cafetería</option>
-                    <option value="restaurante">Restaurante</option>
-                </select>
-                <select id="nuevoSubcategoria" required>
-                    <option value="">Selecciona subcategoría</option>
-                </select>
-                <select id="nuevoEdad" required>
-                    <option value="">Selecciona grupo de edad</option>
-                    <option value="niños">Niños</option>
-                    <option value="jovenes">Jóvenes</option>
-                    <option value="adultos">Adultos</option>
-                    <option value="tercera_edad">Tercera edad</option>
-                    <option value="todas_las_edades">Todas las edades</option>
-                </select>
-                <input type="number" id="nuevoPersonas" placeholder="Número de personas" min="1" required>
-                <input type="text" id="nuevoLocalizacion" placeholder="Localización" required>
-                <input type="datetime-local" id="nuevoFecha" required>
-                <textarea id="nuevoDescripcion" placeholder="Descripción del evento" rows="4" required></textarea>
-                <button type="submit">Añadir Evento</button>
-            </form>
-        </div>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

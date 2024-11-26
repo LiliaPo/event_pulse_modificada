@@ -8,60 +8,36 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userController = void 0;
-const user_1 = require("../models/user");
-class userController {
+exports.UserController = void 0;
+const userModel_1 = require("../models/userModel");
+class UserController {
     static register(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const userData = req.body;
-                // Verificar si el usuario ya existe
-                const existingUser = yield user_1.user.findByUsername(userData.username);
-                if (existingUser) {
-                    return res.status(400).json({
-                        error: 'El nombre de usuario ya está registrado'
-                    });
-                }
-                const newUser = yield user_1.user.create(userData);
-                res.status(201).json(newUser);
+                const user = yield userModel_1.UserModel.createUser(userData);
+                res.status(201).json(user);
             }
             catch (error) {
-                console.error('Error en registro:', error);
-                res.status(500).json({ error: 'Error en el servidor' });
+                res.status(500).json({ error: `Error al registrar usuario: ${error}` });
             }
         });
     }
-    static getUser(req, res) {
+    static login(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { identifier } = req.params;
-                const userFound = yield user_1.user.findByIdentifier(identifier);
-                if (!userFound) {
-                    return res.status(404).json({
-                        error: 'Usuario no encontrado'
-                    });
+                const { email, password } = req.body;
+                const user = yield userModel_1.UserModel.validateLogin(email, password);
+                if (!user) {
+                    return res.status(401).json({ error: 'Credenciales inválidas' });
                 }
-                // Excluir la contraseña de la respuesta
-                const { password } = userFound, userResponse = __rest(userFound, ["password"]);
-                res.json(userResponse);
+                res.json(user);
             }
             catch (error) {
-                console.error('Error al obtener usuario:', error);
-                res.status(500).json({ error: 'Error en el servidor' });
+                res.status(500).json({ error: `Error en el login: ${error}` });
             }
         });
     }
 }
-exports.userController = userController;
+exports.UserController = UserController;
