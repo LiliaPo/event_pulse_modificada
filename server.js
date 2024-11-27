@@ -21,6 +21,7 @@ const pool = new Pool({
 app.post('/api/register', async (req, res) => {
     try {
         const { username, nombre, email, password } = req.body;
+        console.log('Intento de registro:', { email, nombre, username });
         
         // Verificar si el usuario ya existe
         const userExists = await pool.query(
@@ -29,7 +30,7 @@ app.post('/api/register', async (req, res) => {
         );
 
         if (userExists.rows.length > 0) {
-            return res.status(400).json({ error: 'Usuario o email ya registrado' });
+            return res.status(400).json({ message: 'El email o username ya está registrado' });
         }
 
         // Encriptar contraseña
@@ -42,9 +43,9 @@ app.post('/api/register', async (req, res) => {
         );
 
         res.json(newUser.rows[0]);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error en el servidor' });
+    } catch (error) {
+        console.error('Error en registro:', error);
+        res.status(500).json({ message: 'Error al registrar usuario', error: error.message });
     }
 });
 
