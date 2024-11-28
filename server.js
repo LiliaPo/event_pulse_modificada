@@ -261,9 +261,12 @@ app.post('/api/register', async (req, res) => {
         // Encriptar contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insertar el nuevo usuario
+        // Generar un UUID válido usando una subconsulta
         await pool.query(
-            'INSERT INTO usuarios (email, password, nombre, username) VALUES ($1, $2, $3, $4)',
+            `WITH new_uuid AS (SELECT gen_random_uuid() AS uuid)
+             INSERT INTO usuarios (id, email, password, nombre, username)
+             SELECT uuid, $1, $2, $3, $4
+             FROM new_uuid`,
             [email, hashedPassword, nombre, username]
         );
 
