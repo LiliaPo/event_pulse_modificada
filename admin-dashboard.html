@@ -293,6 +293,11 @@
                 <div class="row">
                     <div class="col-12">
                         <h2>Lista de Eventos</h2>
+                        <div class="section-header">
+                            <button onclick="openCreateEventoModal()" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Crear Evento
+                            </button>
+                        </div>
                         <div id="eventosContainer" class="eventos-grid">
                             <!-- Aquí se mostrarán los eventos -->
                         </div>
@@ -410,6 +415,48 @@
                     <input type="text" id="editUserUsername" required>
                 </div>
                 <button type="button" onclick="handleUserSubmit(event)" class="btn btn-primary">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="createEventoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCreateEventoModal()">&times;</span>
+            <h2>Crear Nuevo Evento</h2>
+            <form id="createEventoForm">
+                <div class="form-group">
+                    <label for="createEventoNombre">Nombre:</label>
+                    <input type="text" id="createEventoNombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="createEventoCategoria">Categoría:</label>
+                    <input type="text" id="createEventoCategoria" required>
+                </div>
+                <div class="form-group">
+                    <label for="createEventoSubcategoria">Subcategoría:</label>
+                    <input type="text" id="createEventoSubcategoria">
+                </div>
+                <div class="form-group">
+                    <label for="createEventoFecha">Fecha:</label>
+                    <input type="datetime-local" id="createEventoFecha" required>
+                </div>
+                <div class="form-group">
+                    <label for="createEventoLocalizacion">Localización:</label>
+                    <input type="text" id="createEventoLocalizacion" required>
+                </div>
+                <div class="form-group">
+                    <label for="createEventoDireccion">Dirección:</label>
+                    <input type="text" id="createEventoDireccion">
+                </div>
+                <div class="form-group">
+                    <label for="createEventoOrganizador">Organizador:</label>
+                    <input type="text" id="createEventoOrganizador" required>
+                </div>
+                <div class="form-group">
+                    <label for="createEventoPrecio">Precio:</label>
+                    <input type="number" id="createEventoPrecio" step="0.01" required>
+                </div>
+                <button type="button" onclick="handleCreateEvento()" class="btn btn-primary">Crear Evento</button>
             </form>
         </div>
     </div>
@@ -786,55 +833,41 @@
         });
 
         // Función para manejar la creación de eventos
-        async function handleEventoSubmit(e) {
-            e.preventDefault();
+        document.getElementById('createEventoForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Esto es importante para evitar la redirección
             
-            const eventoId = document.getElementById('editEventoId').value;
-            console.log('ID del evento a actualizar:', eventoId);
-            
-            if (!eventoId) {
-                console.error('No se encontró el ID del evento');
-                return;
-            }
-
             const eventoData = {
-                nombre: document.getElementById('editEventoNombre').value,
-                categoria: document.getElementById('editEventoCategoria').value,
-                subcategoria: document.getElementById('editEventoSubcategoria').value,
-                fecha: document.getElementById('editEventoFecha').value,
-                localizacion: document.getElementById('editEventoLocalizacion').value,
-                direccion: document.getElementById('editEventoDireccion').value,
-                organizador: document.getElementById('editEventoOrganizador').value,
-                precio: parseFloat(document.getElementById('editEventoPrecio').value)
+                nombre: document.getElementById('createEventoNombre').value,
+                categoria: document.getElementById('createEventoCategoria').value,
+                subcategoria: document.getElementById('createEventoSubcategoria').value,
+                fecha: document.getElementById('createEventoFecha').value,
+                localizacion: document.getElementById('createEventoLocalizacion').value,
+                direccion: document.getElementById('createEventoDireccion').value,
+                organizador: document.getElementById('createEventoOrganizador').value,
+                precio: document.getElementById('createEventoPrecio').value
             };
 
-            console.log('Datos a enviar:', eventoData);
-
             try {
-                const response = await fetch(`/api/eventos/${eventoId}`, {
-                    method: 'PUT',
+                const response = await fetch('/api/eventos', {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(eventoData)
                 });
 
-                console.log('Respuesta status:', response.status);
-                const data = await response.json();
-                console.log('Respuesta del servidor:', data);
-
                 if (response.ok) {
-                    closeEditEventoModal();
-                    await loadEventos();
-                    alert('Evento actualizado exitosamente');
+                    closeCreateEventoModal();
+                    await loadEventos(); // Recargar la lista de eventos
+                    alert('Evento creado exitosamente');
                 } else {
-                    throw new Error(data.message || 'Error al actualizar evento');
+                    alert('Error al crear evento');
                 }
             } catch (error) {
-                console.error('Error completo:', error);
-                alert('Error al actualizar evento');
+                console.error('Error:', error);
+                alert('Error al crear evento');
             }
-        }
+        });
 
         // Inicialización cuando se carga la página
         document.addEventListener('DOMContentLoaded', () => {
@@ -890,12 +923,13 @@
             e.preventDefault();
             
             const userId = document.getElementById('editUserId').value;
-            console.log('ID del usuario a actualizar:', userId);
-            
             const userData = {
                 email: document.getElementById('editUserEmail').value,
                 nombre: document.getElementById('editUserNombre').value,
-                username: document.getElementById('editUserUsername').value
+                username: document.getElementById('editUserUsername').value,
+                telefono: document.getElementById('editUserTelefono').value,
+                instagram: document.getElementById('editUserInstagram').value,
+                whatsapp: document.getElementById('editUserWhatsapp').value
             };
 
             try {
@@ -909,7 +943,7 @@
 
                 if (response.ok) {
                     closeEditUserModal();
-                    await loadUsers();  // Recargar la lista de usuarios
+                    await loadUsers();
                     alert('Usuario actualizado exitosamente');
                 } else {
                     throw new Error('Error al actualizar usuario');
@@ -944,6 +978,49 @@
         // Función para cerrar el modal
         function closeEditUserModal() {
             document.getElementById('editUserModal').style.display = 'none';
+        }
+
+        function openCreateEventoModal() {
+            document.getElementById('createEventoModal').style.display = 'block';
+        }
+
+        function closeCreateEventoModal() {
+            document.getElementById('createEventoModal').style.display = 'none';
+            document.getElementById('createEventoForm').reset();
+        }
+
+        function handleCreateEvento() {
+            const eventoData = {
+                nombre: document.getElementById('createEventoNombre').value,
+                categoria: document.getElementById('createEventoCategoria').value,
+                subcategoria: document.getElementById('createEventoSubcategoria').value,
+                fecha: document.getElementById('createEventoFecha').value,
+                localizacion: document.getElementById('createEventoLocalizacion').value,
+                direccion: document.getElementById('createEventoDireccion').value,
+                organizador: document.getElementById('createEventoOrganizador').value,
+                precio: document.getElementById('createEventoPrecio').value
+            };
+
+            fetch('/api/eventos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(eventoData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    closeCreateEventoModal();
+                    loadEventos();
+                    alert('Evento creado exitosamente');
+                } else {
+                    alert('Error al crear evento');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al crear evento');
+            });
         }
     </script>
 </body>

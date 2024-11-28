@@ -32,6 +32,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'login.html'));
+});
+
 app.get('/administrador', (req, res) => {
     res.sendFile(path.join(__dirname, 'administrador.html'));
 });
@@ -66,37 +70,25 @@ app.get('/api/users/all', async (req, res) => {
 // Crear evento
 app.post('/api/eventos', async (req, res) => {
     try {
-        const { 
-            nombre, 
-            categoria, 
-            subcategoria, 
-            fecha, 
-            localizacion, 
-            direccion,
-            organizador, 
-            precio,
-            descripcion,
-            url,
-            imagen 
-        } = req.body;
-        
-        // Generar un ID único
-        const id = Date.now().toString();  // Simplificado para el ejemplo
+        const { nombre, categoria, subcategoria, fecha, localizacion, direccion, organizador, precio } = req.body;
         
         const result = await pool.query(
             `INSERT INTO eventos (
-                id, nombre, categoria, subcategoria, fecha, localizacion, 
-                direccion, organizador, precio, descripcion, url, imagen,
-                created_at, updated_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) 
-            RETURNING *`,
-            [
-                id, nombre, categoria, subcategoria, fecha, localizacion,
-                direccion, organizador, precio, descripcion, url, imagen
-            ]
+                id, 
+                nombre, 
+                categoria, 
+                subcategoria, 
+                fecha, 
+                localizacion, 
+                direccion, 
+                organizador, 
+                precio
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9
+            ) RETURNING *`,
+            [Date.now().toString(), nombre, categoria, subcategoria, fecha, localizacion, direccion, organizador, precio]
         );
 
-        console.log('Evento creado:', result.rows[0]);
         res.status(201).json(result.rows[0]);
     } catch (error) {
         console.error('Error al crear evento:', error);
@@ -208,13 +200,19 @@ app.get('/api/users/:id', async (req, res) => {
 app.put('/api/users/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { email, nombre, username } = req.body;
+        const { email, nombre, username, telefono, instagram, whatsapp } = req.body;
         
         const result = await pool.query(
             `UPDATE usuarios 
-             SET email = $1, nombre = $2, username = $3, updated_at = CURRENT_TIMESTAMP
-             WHERE id = $4 RETURNING *`,
-            [email, nombre, username, id]
+             SET email = $1, 
+                 nombre = $2, 
+                 username = $3, 
+                 telefono = $4,
+                 instagram = $5,
+                 whatsapp = $6,
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE id = $7 RETURNING *`,
+            [email, nombre, username, telefono, instagram, whatsapp, id]
         );
 
         if (result.rows.length === 0) {
@@ -242,6 +240,37 @@ app.delete('/api/users/:id', async (req, res) => {
     } catch (error) {
         console.error('Error al eliminar usuario:', error);
         res.status(500).json({ message: 'Error al eliminar usuario' });
+    }
+});
+
+// Registro
+app.post('/api/register', async (req, res) => {
+    try {
+        const { email, password, nombre, username } = req.body;
+        
+        // Verificar si el usuario ya existe
+        const userExists = await pool.query(
+            'SELECT * FROM usuarios WHERE email = $1 OR username = $2',
+            [email, username]
+        );
+
+        if (userExists.rows.length > 0) {
+            return res.status(400).json({ message: 'El email o username ya está registrado' });
+        }
+
+        // Encriptar contraseña
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insertar el nuevo usuario
+        await pool.query(
+            'INSERT INTO usuarios (email, password, nombre, username) VALUES ($1, $2, $3, $4)',
+            [email, hashedPassword, nombre, username]
+        );
+
+        res.status(201).json({ success: true });
+    } catch (error) {
+        console.error('Error en registro:', error);
+        res.status(500).json({ message: 'Error en el registro' });
     }
 });
 
