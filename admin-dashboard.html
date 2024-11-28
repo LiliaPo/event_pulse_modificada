@@ -183,6 +183,74 @@
             display: flex;
             gap: 10px;
         }
+
+        /* Estilo para lista de eventos */
+        .eventos-lista {
+            padding: 20px;
+        }
+
+        .evento-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+
+        .evento-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .evento-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .evento-body {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .evento-body p {
+            margin: 5px 0;
+        }
+
+        .evento-body i {
+            width: 20px;
+            color: #666;
+        }
+
+        .evento-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -281,8 +349,9 @@
     <!-- Modal para crear/editar evento -->
     <div id="editEventoModal" class="modal">
         <div class="modal-content">
-            <h2 id="eventoModalTitle">Editar Evento</h2>
-            <form id="editEventoForm">
+            <span class="close" onclick="closeEditEventoModal()">&times;</span>
+            <h2>Editar Evento</h2>
+            <form id="editEventoForm" onsubmit="return handleEventoSubmit(event)">
                 <input type="hidden" id="editEventoId">
                 <div class="form-group">
                     <label for="editEventoNombre">Nombre:</label>
@@ -290,14 +359,7 @@
                 </div>
                 <div class="form-group">
                     <label for="editEventoCategoria">Categoría:</label>
-                    <select id="editEventoCategoria" required>
-                        <option value="Música">Música</option>
-                        <option value="Teatro">Teatro</option>
-                        <option value="Deportes">Deportes</option>
-                        <option value="Arte">Arte</option>
-                        <option value="Tecnología">Tecnología</option>
-                        <option value="Gastronomía">Gastronomía</option>
-                    </select>
+                    <input type="text" id="editEventoCategoria" required>
                 </div>
                 <div class="form-group">
                     <label for="editEventoSubcategoria">Subcategoría:</label>
@@ -321,18 +383,9 @@
                 </div>
                 <div class="form-group">
                     <label for="editEventoPrecio">Precio:</label>
-                    <input type="number" id="editEventoPrecio" step="0.01" min="0">
+                    <input type="number" id="editEventoPrecio" step="0.01" required>
                 </div>
-                <div class="form-group">
-                    <label for="editEventoDescripcion">Descripción:</label>
-                    <textarea id="editEventoDescripcion" rows="4"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="editEventoUrl">URL del evento:</label>
-                    <input type="url" id="editEventoUrl">
-                </div>
-                <button type="submit" class="action-button edit-btn">Guardar</button>
-                <button type="button" onclick="closeEditEventoModal()" class="action-button delete-btn">Cancelar</button>
+                <button type="button" onclick="handleEventoSubmit(event)" class="btn btn-primary">Guardar Cambios</button>
             </form>
         </div>
     </div>
@@ -509,17 +562,11 @@
         // Función para cargar eventos
         async function loadEventos() {
             try {
-                console.log('Iniciando carga de eventos...');
                 const response = await fetch('/api/eventos');
                 const eventos = await response.json();
-                console.log('Eventos recibidos:', eventos);
                 
                 const eventosContainer = document.getElementById('eventosContainer');
-                if (!eventosContainer) {
-                    console.error('No se encontró el contenedor de eventos');
-                    return;
-                }
-                
+                eventosContainer.className = 'eventos-lista';  // Cambiar a vista de lista
                 eventosContainer.innerHTML = '';
                 
                 if (eventos.length === 0) {
@@ -536,20 +583,24 @@
                             <span class="categoria">${evento.categoria}</span>
                         </div>
                         <div class="evento-body">
-                            <p><i class="fas fa-calendar"></i> ${new Date(evento.fecha).toLocaleString()}</p>
-                            <p><i class="fas fa-map-marker-alt"></i> ${evento.localizacion}</p>
-                            <p><i class="fas fa-user"></i> ${evento.organizador}</p>
-                            <p><i class="fas fa-euro-sign"></i> ${evento.precio}€</p>
+                            <p><i class="fas fa-calendar"></i> <strong>Fecha:</strong> ${new Date(evento.fecha).toLocaleString()}</p>
+                            <p><i class="fas fa-map-marker-alt"></i> <strong>Localización:</strong> ${evento.localizacion}</p>
+                            <p><i class="fas fa-road"></i> <strong>Dirección:</strong> ${evento.direccion || 'N/A'}</p>
+                            <p><i class="fas fa-tag"></i> <strong>Subcategoría:</strong> ${evento.subcategoria || 'N/A'}</p>
+                            <p><i class="fas fa-user"></i> <strong>Organizador:</strong> ${evento.organizador}</p>
+                            <p><i class="fas fa-euro-sign"></i> <strong>Precio:</strong> ${evento.precio}€</p>
                         </div>
                         <div class="evento-actions">
-                            <button onclick="editarEvento('${evento.id}')" class="btn btn-primary">Editar</button>
-                            <button onclick="deleteEvento('${evento.id}')" class="btn btn-danger">Eliminar</button>
+                            <button onclick="editarEvento('${evento.id}')" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button onclick="deleteEvento('${evento.id}')" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
                         </div>
                     `;
                     eventosContainer.appendChild(eventoElement);
                 });
-                
-                console.log('Eventos cargados exitosamente');
             } catch (error) {
                 console.error('Error al cargar eventos:', error);
             }
@@ -559,23 +610,30 @@
         const eventoModal = document.getElementById('editEventoModal');
         const editEventoForm = document.getElementById('editEventoForm');
 
-        async function editEvento(eventoId) {
+        async function editarEvento(eventoId) {
             try {
+                console.log('ID del evento a editar:', eventoId);
                 const response = await fetch(`/api/eventos/${eventoId}`);
                 const evento = await response.json();
+                console.log('Evento a editar:', evento);
                 
-                document.getElementById('editEventoId').value = evento.id;
+                // Guardar el ID en un campo oculto
+                document.getElementById('editEventoId').value = eventoId;
+                
+                // Rellenar el formulario con los datos actuales
                 document.getElementById('editEventoNombre').value = evento.nombre;
                 document.getElementById('editEventoCategoria').value = evento.categoria;
+                document.getElementById('editEventoSubcategoria').value = evento.subcategoria || '';
                 document.getElementById('editEventoFecha').value = evento.fecha.slice(0, 16);
                 document.getElementById('editEventoLocalizacion').value = evento.localizacion;
                 document.getElementById('editEventoDireccion').value = evento.direccion || '';
                 document.getElementById('editEventoOrganizador').value = evento.organizador;
-                document.getElementById('editEventoPrecio').value = evento.precio || '';
+                document.getElementById('editEventoPrecio').value = evento.precio;
 
-                eventoModal.style.display = 'block';
+                // Mostrar el modal
+                document.getElementById('editEventoModal').style.display = 'block';
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error al cargar evento:', error);
                 alert('Error al cargar el evento');
             }
         }
@@ -596,8 +654,8 @@
         editEventoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const eventoId = document.getElementById('editEventoId').value;
-            const isCreating = !eventoId;
-
+            console.log('ID del evento a actualizar:', eventoId); // Debug
+            
             const eventoData = {
                 nombre: document.getElementById('editEventoNombre').value,
                 categoria: document.getElementById('editEventoCategoria').value,
@@ -606,38 +664,34 @@
                 localizacion: document.getElementById('editEventoLocalizacion').value,
                 direccion: document.getElementById('editEventoDireccion').value,
                 organizador: document.getElementById('editEventoOrganizador').value,
-                precio: document.getElementById('editEventoPrecio').value,
-                descripcion: document.getElementById('editEventoDescripcion').value,
-                url: document.getElementById('editEventoUrl').value
+                precio: document.getElementById('editEventoPrecio').value
             };
 
+            console.log('Datos a enviar:', eventoData);
+
             try {
-                const url = isCreating ? '/api/eventos' : `/api/eventos/${eventoId}`;
-                const method = isCreating ? 'POST' : 'PUT';
-
-                console.log('Enviando datos:', eventoData);
-
-                const response = await fetch(url, {
-                    method: method,
+                const response = await fetch(`/api/eventos/${eventoId}`, {
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(eventoData)
                 });
 
+                console.log('Respuesta status:', response.status);
                 const data = await response.json();
                 console.log('Respuesta del servidor:', data);
 
                 if (response.ok) {
                     closeEditEventoModal();
-                    await loadEventos(); // Aseguramos que se recarguen los eventos
-                    alert(isCreating ? 'Evento creado exitosamente' : 'Evento actualizado exitosamente');
+                    await loadEventos();
+                    alert('Evento actualizado exitosamente');
                 } else {
-                    alert(data.message || `Error al ${isCreating ? 'crear' : 'actualizar'} evento`);
+                    throw new Error(data.message || 'Error al actualizar evento');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert(`Error al ${isCreating ? 'crear' : 'actualizar'} evento`);
+                console.error('Error completo:', error);
+                alert('Error al actualizar evento');
             }
         });
 
@@ -711,6 +765,14 @@
         async function handleEventoSubmit(e) {
             e.preventDefault();
             
+            const eventoId = document.getElementById('editEventoId').value;
+            console.log('ID del evento a actualizar:', eventoId);
+            
+            if (!eventoId) {
+                console.error('No se encontró el ID del evento');
+                return;
+            }
+
             const eventoData = {
                 nombre: document.getElementById('editEventoNombre').value,
                 categoria: document.getElementById('editEventoCategoria').value,
@@ -719,28 +781,34 @@
                 localizacion: document.getElementById('editEventoLocalizacion').value,
                 direccion: document.getElementById('editEventoDireccion').value,
                 organizador: document.getElementById('editEventoOrganizador').value,
-                precio: document.getElementById('editEventoPrecio').value
+                precio: parseFloat(document.getElementById('editEventoPrecio').value)
             };
 
+            console.log('Datos a enviar:', eventoData);
+
             try {
-                const response = await fetch('/api/eventos', {
-                    method: 'POST',
+                const response = await fetch(`/api/eventos/${eventoId}`, {
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(eventoData)
                 });
 
+                console.log('Respuesta status:', response.status);
+                const data = await response.json();
+                console.log('Respuesta del servidor:', data);
+
                 if (response.ok) {
                     closeEditEventoModal();
-                    await loadEventos();  // Recargar la lista de eventos
-                    alert('Evento creado exitosamente');
+                    await loadEventos();
+                    alert('Evento actualizado exitosamente');
                 } else {
-                    throw new Error('Error al crear evento');
+                    throw new Error(data.message || 'Error al actualizar evento');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error al crear evento');
+                console.error('Error completo:', error);
+                alert('Error al actualizar evento');
             }
         }
 
@@ -755,74 +823,6 @@
                 editEventoForm.addEventListener('submit', handleEventoSubmit);
             }
         });
-
-        // Función para editar evento
-        async function editarEvento(eventoId) {
-            try {
-                const response = await fetch(`/api/eventos/${eventoId}`);
-                const evento = await response.json();
-                
-                // Rellenar el formulario con los datos del evento
-                document.getElementById('editEventoId').value = evento.id;
-                document.getElementById('editEventoNombre').value = evento.nombre;
-                document.getElementById('editEventoCategoria').value = evento.categoria;
-                document.getElementById('editEventoSubcategoria').value = evento.subcategoria;
-                document.getElementById('editEventoFecha').value = evento.fecha.slice(0, 16); // Formato para datetime-local
-                document.getElementById('editEventoLocalizacion').value = evento.localizacion;
-                document.getElementById('editEventoDireccion').value = evento.direccion;
-                document.getElementById('editEventoOrganizador').value = evento.organizador;
-                document.getElementById('editEventoPrecio').value = evento.precio;
-
-                // Mostrar el modal
-                document.getElementById('editEventoModal').style.display = 'block';
-            } catch (error) {
-                console.error('Error al cargar evento:', error);
-                alert('Error al cargar el evento');
-            }
-        }
-
-        // Función para guardar los cambios
-        async function handleEventoSubmit(e) {
-            e.preventDefault();
-            
-            const eventoId = document.getElementById('editEventoId').value;
-            const isEditing = eventoId !== '';
-            
-            const eventoData = {
-                nombre: document.getElementById('editEventoNombre').value,
-                categoria: document.getElementById('editEventoCategoria').value,
-                subcategoria: document.getElementById('editEventoSubcategoria').value,
-                fecha: document.getElementById('editEventoFecha').value,
-                localizacion: document.getElementById('editEventoLocalizacion').value,
-                direccion: document.getElementById('editEventoDireccion').value,
-                organizador: document.getElementById('editEventoOrganizador').value,
-                precio: document.getElementById('editEventoPrecio').value
-            };
-
-            try {
-                const url = isEditing ? `/api/eventos/${eventoId}` : '/api/eventos';
-                const method = isEditing ? 'PUT' : 'POST';
-
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(eventoData)
-                });
-
-                if (response.ok) {
-                    closeEditEventoModal();
-                    await loadEventos();  // Recargar la lista de eventos
-                    alert(isEditing ? 'Evento actualizado exitosamente' : 'Evento creado exitosamente');
-                } else {
-                    throw new Error(isEditing ? 'Error al actualizar evento' : 'Error al crear evento');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert(error.message);
-            }
-        }
 
         // Función para cerrar el modal
         function closeEditEventoModal() {

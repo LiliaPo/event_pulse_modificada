@@ -110,12 +110,22 @@ app.put('/api/eventos/:id', async (req, res) => {
         const { id } = req.params;
         const { nombre, categoria, subcategoria, fecha, localizacion, direccion, organizador, precio } = req.body;
         
+        console.log('ID del evento a actualizar:', id); // Debug
+        console.log('Datos a actualizar:', req.body); // Debug
+        
         const result = await pool.query(
             `UPDATE eventos 
-             SET nombre = $1, categoria = $2, subcategoria = $3, fecha = $4,
-                 localizacion = $5, direccion = $6, organizador = $7, precio = $8,
+             SET nombre = $1, 
+                 categoria = $2, 
+                 subcategoria = $3, 
+                 fecha = $4,
+                 localizacion = $5, 
+                 direccion = $6, 
+                 organizador = $7, 
+                 precio = $8,
                  updated_at = CURRENT_TIMESTAMP
-             WHERE id = $9 RETURNING *`,
+             WHERE id = $9 
+             RETURNING *`,
             [nombre, categoria, subcategoria, fecha, localizacion, direccion, organizador, precio, id]
         );
 
@@ -123,6 +133,7 @@ app.put('/api/eventos/:id', async (req, res) => {
             return res.status(404).json({ message: 'Evento no encontrado' });
         }
 
+        console.log('Evento actualizado:', result.rows[0]); // Debug
         res.json(result.rows[0]);
     } catch (error) {
         console.error('Error al actualizar evento:', error);
@@ -156,6 +167,23 @@ app.get('/api/eventos', async (req, res) => {
     } catch (error) {
         console.error('Error al obtener eventos:', error);
         res.status(500).json({ message: 'Error al obtener eventos' });
+    }
+});
+
+// Obtener un evento específico
+app.get('/api/eventos/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query('SELECT * FROM eventos WHERE id = $1', [id]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Evento no encontrado' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Error al obtener evento:', error);
+        res.status(500).json({ message: 'Error al obtener evento' });
     }
 });
 
