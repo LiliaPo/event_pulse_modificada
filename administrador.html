@@ -40,5 +40,36 @@
     </div>
     <script src="script.js"></script>
     <script src="js/admin.js"></script>
+    <script>
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+
+            fetch('/api/admin/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    password
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Si el login es exitoso, redirigir al dashboard
+                    window.location.href = '/admin-dashboard.html';
+                } else {
+                    throw new Error('Credenciales inválidas');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al iniciar sesión como administrador');
+            });
+        });
+    </script>
 </body>
 </html> 

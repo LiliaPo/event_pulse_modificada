@@ -83,37 +83,41 @@
             document.getElementById('specialCheck').style.color = requirements.special ? '#4CAF50' : '#ff6b6b';
         });
 
-        document.getElementById('registroForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const userData = {
-                nombre: document.getElementById('nombreRegistro').value,
-                username: document.getElementById('usernameRegistro').value,
-                email: document.getElementById('emailRegistro').value,
-                password: document.getElementById('passwordRegistro').value
-            };
+        // Capturar el formulario de registro
+    document.getElementById('registroForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        
+        const email = document.getElementById('emailRegistro').value;
+        const password = document.getElementById('passwordRegistro').value;
+        const nombre = document.getElementById('nombreRegistro').value;
+        const username = document.getElementById('usernameRegistro').value;
 
-            try {
-                const response = await fetch('/api/users/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(userData)
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    window.location.href = '/EventPulse/index.html';  // Redirección directa
-                } else {
-                    alert('Error en el registro: ' + data.error);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error al intentar registrarse');
+        fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email,
+                password,
+                nombre,
+                username
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '/EventPulse/index.html';
+            } else {
+                throw new Error('Error en el registro');
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al registrar usuario');
         });
+    });
+
     </script>
     <script src="script.js"></script>
 </body>

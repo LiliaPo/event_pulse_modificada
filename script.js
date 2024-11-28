@@ -1,12 +1,5 @@
 let map;
 
-// Datos de ejemplo
-const eventos = [
-    { id: 1, nombre: "Concierto de Rock", categoria: "musica", subcategoria: "rock", edad: "jovenes", personas: 100, localizacion: "Madrid", organizador: "Juan", fecha: "2023-06-15T20:00", imagen: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" },
-    { id: 2, nombre: "Partido de Fútbol", categoria: "deporte", subcategoria: "fútbol", edad: "adultos", personas: 50, localizacion: "Barcelona", organizador: "María", fecha: "2023-06-20T16:00", imagen: "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" },
-    { id: 3, nombre: "Exposición de Arte", categoria: "arte", subcategoria: "pintura", edad: "adultos", personas: 30, localizacion: "Valencia", organizador: "Carlos", fecha: "2023-06-25T10:00", imagen: "https://images.unsplash.com/photo-1531913764164-f85c52e6e654?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" }
-];
-
 function initMap() {
     map = L.map('mapa').setView([40.416775, -3.703790], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -27,6 +20,7 @@ function mostrarEventos(eventosAMostrar) {
             <h3>${evento.nombre}</h3>
             <p><i class="fas fa-calendar"></i> ${new Date(evento.fecha).toLocaleDateString()}</p>
             <p><i class="fas fa-map-marker-alt"></i> ${evento.localizacion}</p>
+            <p><i class="fas fa-euro-sign"></i> ${evento.precio ? evento.precio.toFixed(2) : '0.00'} €</p>
             <button class="btn-ver-mas" data-id="${evento.id}">Ver más</button>
         `;
         contenedorEventos.appendChild(eventoElement);
@@ -84,3 +78,243 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const registerForm = document.getElementById('registerForm');
+    const errorMessage = document.getElementById('errorMessage');
+
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const nombre = document.getElementById('nombre').value;
+        const username = document.getElementById('username').value;
+
+        try {
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password, nombre, username }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Redirigir a la página de eventos
+                window.location.href = '/EventPulse/index.html'; // Asegúrate de que esta URL sea correcta
+            } else {
+                // Mostrar mensaje de error
+                errorMessage.textContent = `Error: ${data.message}`;
+                errorMessage.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error completo:', error);
+            errorMessage.textContent = 'Error de conexión';
+            errorMessage.style.display = 'block';
+        }
+    });
+});
+
+// Función para editar un evento
+async function editarEvento(eventoId) {
+    try {
+        const response = await fetch(`/api/eventos/${eventoId}`);
+        const evento = await response.json();
+        
+        // Rellenar el formulario con los datos del evento
+        document.getElementById('editNombre').value = evento.nombre;
+        document.getElementById('editCategoria').value = evento.categoria;
+        document.getElementById('editSubcategoria').value = evento.subcategoria;
+        document.getElementById('editEdad').value = evento.edad;
+        document.getElementById('editPersonas').value = evento.personas;
+        document.getElementById('editPrecio').value = evento.precio;
+        document.getElementById('editLocalizacion').value = evento.localizacion;
+        document.getElementById('editOrganizador').value = evento.organizador;
+        document.getElementById('editFecha').value = evento.fecha;
+        
+        // Guardar el ID del evento actual
+        document.getElementById('eventoIdActual').value = eventoId;
+        
+        // Mostrar el modal
+        const editModal = new bootstrap.Modal(document.getElementById('editEventoModal'));
+        editModal.show();
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarAlerta('Error al cargar el evento', 'danger');
+    }
+}
+
+// Función para guardar los cambios del evento
+async function guardarCambiosEvento() {
+    const eventoId = document.getElementById('eventoIdActual').value;
+    const eventoActualizado = {
+        nombre: document.getElementById('editNombre').value,
+        categoria: document.getElementById('editCategoria').value,
+        subcategoria: document.getElementById('editSubcategoria').value,
+        edad: document.getElementById('editEdad').value,
+        personas: parseInt(document.getElementById('editPersonas').value),
+        precio: parseFloat(document.getElementById('editPrecio').value),
+        localizacion: document.getElementById('editLocalizacion').value,
+        organizador: document.getElementById('editOrganizador').value,
+        fecha: document.getElementById('editFecha').value
+    };
+
+    try {
+        const response = await fetch(`/api/eventos/${eventoId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(eventoActualizado)
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al actualizar el evento');
+        }
+
+        // Cerrar el modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editEventoModal'));
+        modal.hide();
+
+        // Recargar eventos
+        cargarEventos();
+        mostrarAlerta('Evento actualizado exitosamente', 'success');
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarAlerta('Error al actualizar el evento', 'danger');
+    }
+}
+
+// Función para borrar un evento
+async function borrarEvento(eventoId) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este evento?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/eventos/${eventoId}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al eliminar el evento');
+        }
+
+        // Recargar eventos
+        cargarEventos();
+        mostrarAlerta('Evento eliminado exitosamente', 'success');
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarAlerta('Error al eliminar el evento', 'danger');
+    }
+}
+
+// Función para cargar eventos
+async function cargarEventos() {
+    try {
+        const response = await fetch('/api/eventos');
+        if (!response.ok) {
+            throw new Error('Error al cargar los eventos');
+        }
+        const eventos = await response.json();
+        mostrarEventos(eventos);
+        mostrarEventosEnMapa(eventos);
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarAlerta('Error al cargar los eventos', 'danger');
+    }
+}
+
+// Función auxiliar para mostrar alertas
+function mostrarAlerta(mensaje, tipo) {
+    const alertaDiv = document.createElement('div');
+    alertaDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
+    alertaDiv.role = 'alert';
+    alertaDiv.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    const contenedor = document.querySelector('.container');
+    contenedor.insertBefore(alertaDiv, contenedor.firstChild);
+    
+    // Eliminar la alerta después de 3 segundos
+    setTimeout(() => {
+        alertaDiv.remove();
+    }, 3000);
+}
+
+async function login(email, password) {
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            localStorage.setItem('token', data.token);
+            return true;
+        } else {
+            throw new Error(data.message);
+        }
+    } catch (error) {
+        console.error('Error de login:', error);
+        throw error;
+    }
+}
+
+// Función para actualizar usuario
+async function actualizarUsuario(userId, userData) {
+    try {
+        const response = await fetch(`/api/users/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(userData)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Error al actualizar usuario');
+        }
+
+        const data = await response.json();
+        mostrarAlerta('Usuario actualizado exitosamente', 'success');
+        return data;
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarAlerta(error.message, 'danger');
+        throw error;
+    }
+}
+
+// Función para obtener perfil de usuario
+async function obtenerPerfilUsuario() {
+    try {
+        const response = await fetch('/api/users/profile', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al obtener perfil de usuario');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarAlerta(error.message, 'danger');
+        throw error;
+    }
+}
