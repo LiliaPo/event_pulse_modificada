@@ -187,6 +187,64 @@ app.get('/api/eventos/:id', async (req, res) => {
     }
 });
 
+// Obtener un usuario específico
+app.get('/api/users/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query('SELECT * FROM usuarios WHERE id = $1', [id]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Error al obtener usuario:', error);
+        res.status(500).json({ message: 'Error al obtener usuario' });
+    }
+});
+
+// Actualizar usuario
+app.put('/api/users/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { email, nombre, username } = req.body;
+        
+        const result = await pool.query(
+            `UPDATE usuarios 
+             SET email = $1, nombre = $2, username = $3, updated_at = CURRENT_TIMESTAMP
+             WHERE id = $4 RETURNING *`,
+            [email, nombre, username, id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Error al actualizar usuario:', error);
+        res.status(500).json({ message: 'Error al actualizar usuario' });
+    }
+});
+
+// Eliminar usuario
+app.delete('/api/users/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query('DELETE FROM usuarios WHERE id = $1 RETURNING *', [id]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        res.json({ message: 'Usuario eliminado exitosamente' });
+    } catch (error) {
+        console.error('Error al eliminar usuario:', error);
+        res.status(500).json({ message: 'Error al eliminar usuario' });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
