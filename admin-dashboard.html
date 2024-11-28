@@ -456,6 +456,14 @@
                     <label for="createEventoPrecio">Precio:</label>
                     <input type="number" id="createEventoPrecio" step="0.01" required>
                 </div>
+                <div class="form-group">
+                    <label for="createEventoUrl">URL del Evento:</label>
+                    <input type="url" id="createEventoUrl" class="form-control" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label for="createEventoImagen">Imagen del Evento:</label>
+                    <input type="file" id="createEventoImagen" class="form-control" accept="image/*">
+                </div>
                 <button type="button" onclick="handleCreateEvento()" class="btn btn-primary">Crear Evento</button>
             </form>
         </div>
@@ -990,23 +998,31 @@
         }
 
         function handleCreateEvento() {
-            const eventoData = {
-                nombre: document.getElementById('createEventoNombre').value,
-                categoria: document.getElementById('createEventoCategoria').value,
-                subcategoria: document.getElementById('createEventoSubcategoria').value,
-                fecha: document.getElementById('createEventoFecha').value,
-                localizacion: document.getElementById('createEventoLocalizacion').value,
-                direccion: document.getElementById('createEventoDireccion').value,
-                organizador: document.getElementById('createEventoOrganizador').value,
-                precio: document.getElementById('createEventoPrecio').value
-            };
+            const formData = new FormData();
+            
+            // Campos existentes
+            formData.append('nombre', document.getElementById('createEventoNombre').value);
+            formData.append('categoria', document.getElementById('createEventoCategoria').value);
+            formData.append('subcategoria', document.getElementById('createEventoSubcategoria').value);
+            formData.append('fecha', document.getElementById('createEventoFecha').value);
+            formData.append('localizacion', document.getElementById('createEventoLocalizacion').value);
+            formData.append('direccion', document.getElementById('createEventoDireccion').value);
+            formData.append('organizador', document.getElementById('createEventoOrganizador').value);
+            formData.append('precio', document.getElementById('createEventoPrecio').value);
+            
+            // Campos nuevos
+            formData.append('url', document.getElementById('createEventoUrl').value);
+            const imagenFile = document.getElementById('createEventoImagen').files[0];
+            if (imagenFile) {
+                formData.append('imagen', imagenFile);
+            }
 
             fetch('/api/eventos', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify(eventoData)
+                body: formData
             })
             .then(response => {
                 if (response.ok) {
