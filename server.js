@@ -102,9 +102,6 @@ app.put('/api/eventos/:id', async (req, res) => {
         const { id } = req.params;
         const { nombre, categoria, subcategoria, fecha, localizacion, direccion, organizador, precio } = req.body;
         
-        console.log('ID del evento a actualizar:', id); // Debug
-        console.log('Datos a actualizar:', req.body); // Debug
-        
         const result = await pool.query(
             `UPDATE eventos 
              SET nombre = $1, 
@@ -125,7 +122,6 @@ app.put('/api/eventos/:id', async (req, res) => {
             return res.status(404).json({ message: 'Evento no encontrado' });
         }
 
-        console.log('Evento actualizado:', result.rows[0]); // Debug
         res.json(result.rows[0]);
     } catch (error) {
         console.error('Error al actualizar evento:', error);
@@ -274,6 +270,30 @@ app.post('/api/register', async (req, res) => {
     } catch (error) {
         console.error('Error en registro:', error);
         res.status(500).json({ message: 'Error en el registro' });
+    }
+});
+
+// Login
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        
+        if (result.rows.length === 0) {
+            return res.status(401).json({ message: 'Credenciales inválidas' });
+        }
+
+        const user = result.rows[0];
+        const validPassword = await bcrypt.compare(password, user.password);
+
+        if (!validPassword) {
+            return res.status(401).json({ message: 'Credenciales inválidas' });
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error en login:', error);
+        res.status(500).json({ message: 'Error en el login' });
     }
 });
 

@@ -1000,7 +1000,7 @@
         function handleCreateEvento() {
             const formData = new FormData();
             
-            // Campos existentes
+            // Campos obligatorios
             formData.append('nombre', document.getElementById('createEventoNombre').value);
             formData.append('categoria', document.getElementById('createEventoCategoria').value);
             formData.append('subcategoria', document.getElementById('createEventoSubcategoria').value);
@@ -1020,9 +1020,9 @@
             fetch('/api/eventos', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Content-Type': 'application/json'
                 },
-                body: formData
+                body: JSON.stringify(Object.fromEntries(formData))
             })
             .then(response => {
                 if (response.ok) {
@@ -1037,6 +1037,44 @@
                 console.error('Error:', error);
                 alert('Error al crear evento');
             });
+        }
+
+        // Función para guardar cambios del evento
+        async function handleEventoSubmit(e) {
+            e.preventDefault();
+            
+            const eventoId = document.getElementById('editEventoId').value;
+            const eventoData = {
+                nombre: document.getElementById('editEventoNombre').value,
+                categoria: document.getElementById('editEventoCategoria').value,
+                subcategoria: document.getElementById('editEventoSubcategoria').value,
+                fecha: document.getElementById('editEventoFecha').value,
+                localizacion: document.getElementById('editEventoLocalizacion').value,
+                direccion: document.getElementById('editEventoDireccion').value,
+                organizador: document.getElementById('editEventoOrganizador').value,
+                precio: document.getElementById('editEventoPrecio').value
+            };
+
+            try {
+                const response = await fetch(`/api/eventos/${eventoId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(eventoData)
+                });
+
+                if (response.ok) {
+                    closeEditEventoModal();
+                    await loadEventos();
+                    alert('Evento actualizado exitosamente');
+                } else {
+                    throw new Error('Error al actualizar evento');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al actualizar evento');
+            }
         }
     </script>
 </body>

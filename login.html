@@ -88,37 +88,34 @@
         });
 
         // Capturar el formulario de login
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        window.location.href = '/EventPulse/index.html'; // Redirección directa a la página de eventos
         
-        // Obtener los valores del formulario
         const email = document.getElementById('emailLogin').value;
         const password = document.getElementById('passwordLogin').value;
 
-        // Hacer la petición al servidor
-        fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, password })
-        })
-        .then(response => {
-            // Si el login es exitoso, redirigir inmediatamente
-            if (response.ok) {
-                window.location.href = '/EventPulse/index.html';
-                return;
-            }
-            // Si hay error, mostrarlo
-            return response.json().then(data => {
-                throw new Error(data.message || 'Error en el login');
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
             });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert(error.message);
-        });
+
+            if (response.ok) {
+                const userData = await response.json();
+                // Guardar datos del usuario que ha iniciado sesión
+                localStorage.setItem('userEmail', userData.email);
+                localStorage.setItem('userName', userData.nombre);
+                
+                window.location.href = '/EventPulse/index.html';
+            } else {
+                alert('Credenciales inválidas');
+            }
+        } catch (error) {
+            alert('Error al iniciar sesión');
+        }
     });
     </script>
     <script src="script.js"></script>
