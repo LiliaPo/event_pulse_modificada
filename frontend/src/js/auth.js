@@ -1,74 +1,55 @@
 export function setupAuth() {
     const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-
+    
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const username = document.getElementById('usernameLogin').value;
+            const email = document.getElementById('emailLogin').value;
+            const password = document.getElementById('passwordLogin').value;
+
+            console.log('Intentando login con:', { username, email });
 
             try {
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ email, password }),
+                    body: JSON.stringify({ username, email, password })
                 });
 
+                console.log('Respuesta del servidor:', response.status);
+
                 const data = await response.json();
+                console.log('Datos recibidos:', data);
 
                 if (response.ok) {
+                    console.log('Login exitoso, guardando datos...');
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('userData', JSON.stringify(data.user));
+                    localStorage.setItem('userId', data.user.id);
+                    localStorage.setItem('userRole', data.user.rol);
+
+                    console.log('Redirigiendo...');
                     window.location.href = '/eventos';
                 } else {
-                    alert(data.message);
+                    console.log('Error en login:', data.message);
+                    alert(data.message || 'Error al iniciar sesión');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error en el login');
-            }
-        });
-    }
-
-    if (registerForm) {
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const userData = {
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
-                nombre: document.getElementById('nombre').value,
-                username: document.getElementById('username').value
-            };
-
-            try {
-                const response = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(userData),
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert('Registro exitoso');
-                    window.location.href = '/eventos';
-                } else {
-                    alert(data.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error en el registro');
+                console.error('Error en la petición:', error);
+                alert('Error al iniciar sesión');
             }
         });
     }
 }
+
+// Asegurarnos de que la función se ejecute cuando se carga la página
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Inicializando auth.js');
+    setupAuth();
+});
 
 // Función para validar la contraseña en tiempo real
 function setupPasswordValidation(passwordInputId) {

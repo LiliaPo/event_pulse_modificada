@@ -5,9 +5,13 @@ import { TypedRequest, TypedResponse, User } from '../types/types.js';
 
 export const login = async (req: TypedRequest, res: TypedResponse) => {
     try {
-        const { email, password } = req.body;
-        const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        const { username, email, password } = req.body;
         
+        const result = await pool.query(
+            'SELECT * FROM usuarios WHERE email = $1 AND username = $2',
+            [email, username]
+        );
+
         if (result.rows.length === 0) {
             return res.status(401).json({ message: 'Credenciales inválidas' });
         }
@@ -20,8 +24,8 @@ export const login = async (req: TypedRequest, res: TypedResponse) => {
         }
 
         const token = jwt.sign(
-            { id: user.id, email: user.email },
-            process.env.JWT_SECRET || 'saul quique lilia',
+            { id: user.id, email: user.email, rol: user.rol },
+            process.env.JWT_SECRET || 'tu_clave_secreta',
             { expiresIn: '24h' }
         );
 
@@ -30,7 +34,8 @@ export const login = async (req: TypedRequest, res: TypedResponse) => {
             user: {
                 id: user.id,
                 email: user.email,
-                nombre: user.nombre
+                nombre: user.nombre,
+                rol: user.rol
             }
         });
     } catch (error) {

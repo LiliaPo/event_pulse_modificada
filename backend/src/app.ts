@@ -34,6 +34,14 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(pagesPath, 'index.html'));
 });
 
+app.get('/registro', (req, res) => {
+    res.sendFile(path.join(pagesPath, 'registro.html'));
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(pagesPath, 'login.html'));
+});
+
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(pagesPath, 'admin.html'));
 });
@@ -43,6 +51,7 @@ app.get('/admin-dashboard', (req, res) => {
 });
 
 app.get('/eventos', (req, res) => {
+    console.log('Accediendo a la página de eventos');
     res.sendFile(path.join(pagesPath, 'eventos.html'));
 });
 
