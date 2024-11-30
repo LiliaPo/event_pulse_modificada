@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - EventosFiltro</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="portada" id="portada">
+        <div class="evento-grid">
+            <div class="evento-item" style="background-image: url('https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+            <div class="evento-item" style="background-image: url('https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+            <div class="evento-item" style="background-image: url('https://images.unsplash.com/photo-1536924940846-227afb31e2a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+            <div class="evento-item" style="background-image: url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+            <div class="evento-item" style="background-image: url('https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+            <div class="evento-item" style="background-image: url('https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+        </div>
+        <div class="portada-contenido">
+            <a href="/" class="btn-volver">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <div class="container">
+                <h1>Iniciar Sesión</h1>
+                <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="usernameLogin">Nombre de usuario:</label>
+                        <input type="text" id="usernameLogin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="emailLogin">Email:</label>
+                        <input type="email" id="emailLogin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordLogin">Contraseña:</label>
+                        <input type="password" id="passwordLogin" required>
+                        <small class="password-requirements" id="passwordHint">
+                            La contraseña debe tener al menos:
+                            <ul>
+                                <li id="lengthCheck">8 caracteres</li>
+                                <li id="upperCheck">1 mayúscula</li>
+                                <li id="lowerCheck">1 minúscula</li>
+                                <li id="specialCheck">1 símbolo especial (@$!%*?&)</li>
+                            </ul>
+                        </small>
+                    </div>
+                    <button type="submit" class="btn-primary">Iniciar Sesión</button>
+                </form>
+                <p>¿No tienes una cuenta? <a href="/registro">Regístrate aquí</a></p>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="/js/auth.js"></script>
+</body>
+</html> 
