@@ -13,9 +13,12 @@
 <body>
     <div class="container" id="contenido">
         <nav>
-            <button id="mostrarPerfil" class="btn-perfil">
-                <img id="imagenPerfilNav" src="https://via.placeholder.com/40" alt="Foto de perfil" class="foto-perfil-nav">
+            <button class="btn-perfil">
+                <img src="https://via.placeholder.com/35" alt="Foto de perfil" class="foto-perfil-nav">
                 Mi Perfil
+            </button>
+            <button id="abrirForo" class="btn-foro">
+                <i class="fas fa-comments"></i> Foro General
             </button>
         </nav>
 
@@ -101,14 +104,18 @@
                     <button id="ubicacionActual">Usar ubicación actual</button>
                     <button id="filtrar">Filtrar</button>
                 </div>
-                <button id="abrirFormulario" class="btn-agregar">Añadir Nuevo Evento</button>
+            </div>
+
+            <div class="acciones-principales">
+                <button id="abrirFormulario" class="btn-agregar">
+                    <i class="fas fa-plus"></i> Añadir Nuevo Evento
+                </button>
             </div>
 
             <div id="mapa"></div>
             <div id="eventos" class="eventos"></div>
             
-            <h2>Personas con Eventos Similares</h2>
-            <div id="personasSimilares" class="personas-similares"></div>
+            
         </div>
     </div>
 
@@ -218,7 +225,6 @@
         <div class="modal-contenido">
             <span class="cerrar">&times;</span>
             <h2 id="tituloEventoForo"></h2>
-            <div id="detallesEvento"></div>
             <div id="chatForo"></div>
             <form id="formMensaje">
                 <input type="text" id="mensajeChat" placeholder="Escribe un mensaje..." required>
@@ -228,5 +234,7 @@
     </div>
 
     <script type="module" src="/js/eventos.js"></script>
+    <script type="module" src="/js/perfil.js"></script>
+    <script type="module" src="/js/foro.js"></script>
 </body>
 </html> 

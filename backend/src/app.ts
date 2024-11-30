@@ -2,9 +2,11 @@ import express from 'express';
 import path from 'path';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
-import authRoutes from './routes/authRoutes';
-import eventRoutes from './routes/eventRoutes';
+import authRoutes from './routes/authRoutes.js';
+import eventRoutes from './routes/eventRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import { authenticateAdmin } from './middleware/auth.js';
+import { RequestHandler } from 'express';
 
 // Configurar __dirname para ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -30,34 +32,22 @@ app.use('/api/users', userRoutes);
 // Rutas de páginas
 const pagesPath = path.join(__dirname, '../../frontend/src/pages');
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(pagesPath, 'index.html'));
-});
+const sendFileHandler = (filePath: string): RequestHandler => 
+    (req, res) => void res.sendFile(filePath);
 
-app.get('/registro', (req, res) => {
-    res.sendFile(path.join(pagesPath, 'registro.html'));
-});
-
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(pagesPath, 'login.html'));
-});
-
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(pagesPath, 'admin.html'));
-});
-
+app.get('/', sendFileHandler(path.join(pagesPath, 'index.html')));
+app.get('/registro', sendFileHandler(path.join(pagesPath, 'registro.html')));
+app.get('/login', sendFileHandler(path.join(pagesPath, 'login.html')));
+app.get('/admin', sendFileHandler(path.join(pagesPath, 'admin.html')));
 app.get('/admin-dashboard', (req, res) => {
+    console.log('Sirviendo admin-dashboard');
     res.sendFile(path.join(pagesPath, 'admin-dashboard.html'));
 });
+app.get('/eventos', sendFileHandler(path.join(pagesPath, 'eventos.html')));
 
-app.get('/eventos', (req, res) => {
-    console.log('Accediendo a la página de eventos');
-    res.sendFile(path.join(pagesPath, 'eventos.html'));
-});
-
-// Manejar rutas no encontradas
-app.use((req, res) => {
-    res.status(404).send('Página no encontrada');
+// Manejar todas las demás rutas
+app.get('*', (req, res) => {
+    res.sendFile(path.join(pagesPath, 'index.html'));
 });
 
 export default app;

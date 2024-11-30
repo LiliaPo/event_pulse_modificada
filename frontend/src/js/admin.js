@@ -18,9 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            if (data.success) {
-                localStorage.setItem('adminToken', data.token);
-                window.location.href = '/admin-dashboard';
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userId', data.user.id);
+                localStorage.setItem('userRole', data.user.rol);
+                localStorage.setItem('userName', data.user.nombre);
+                localStorage.setItem('userEmail', data.user.email);
+                
+                window.location.href = '/pages/admin-dashboard.html';
             } else {
                 const errorMessage = document.getElementById('errorMessage');
                 errorMessage.textContent = 'Credenciales inválidas';

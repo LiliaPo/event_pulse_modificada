@@ -5,13 +5,15 @@ import { TypedRequest, TypedResponse, User } from '../types/types.js';
 import { Request, Response, NextFunction } from 'express';
 import { RequestHandler } from 'express-serve-static-core';
 
-export const login = async (req: TypedRequest, res: TypedResponse) => {
+export const login = async (req: Request, res: Response) => {
     try {
-        const { username, email, password } = req.body;
+        const { email, password } = req.body;
+        
+        console.log('Intento de login:', { email, password: '****' });
         
         const result = await pool.query(
-            'SELECT * FROM usuarios WHERE email = $1 AND username = $2',
-            [email, username]
+            'SELECT * FROM usuarios WHERE email = $1',
+            [email]
         );
 
         if (result.rows.length === 0) {
@@ -27,8 +29,8 @@ export const login = async (req: TypedRequest, res: TypedResponse) => {
 
         const token = jwt.sign(
             { id: user.id, email: user.email, rol: user.rol },
-            process.env.JWT_SECRET || 'tu_clave_secreta',
-            { expiresIn: '96h' }
+            process.env.JWT_SECRET || 'saul quique lilia',
+            { expiresIn: '24h' }
         );
 
         res.json({
@@ -74,7 +76,7 @@ export const register: RequestHandler = async (req, res, next) => {
         const user = result.rows[0];
         const token = jwt.sign(
             { id: user.id, email: user.email, rol: user.rol },
-            process.env.JWT_SECRET || 'tu_clave_secreta',
+            process.env.JWT_SECRET || 'saul quique lilia',
             { expiresIn: '24h' }
         );
 
@@ -94,17 +96,32 @@ export const register: RequestHandler = async (req, res, next) => {
     }
 };
 
-export const adminLogin = async (req: TypedRequest, res: TypedResponse) => {
+export const adminLogin = async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
-    
+    console.log('Intento de login admin:', { email, password: '****' });
+
     if (email === 'admin@admin.com' && password === 'admin123') {
+        console.log('Credenciales admin correctas, generando token...');
         const token = jwt.sign(
-            { role: 'admin' },
+            { id: 'admin', email: 'admin@admin.com', rol: 'admin' },
             process.env.JWT_SECRET || 'saul quique lilia',
             { expiresIn: '24h' }
         );
-        res.json({ success: true, token });
-    } else {
-        res.status(401).json({ message: 'Credenciales inválidas' });
+
+        const response = {
+            token,
+            user: {
+                id: 'admin',
+                email: 'admin@admin.com',
+                nombre: 'Administrador',
+                rol: 'admin'
+            }
+        };
+
+        console.log('Enviando respuesta:', response);
+        res.json(response);
+        return;
     }
+
+    res.status(401).json({ message: 'Credenciales inválidas' });
 }; 

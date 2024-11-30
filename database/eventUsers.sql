@@ -36,14 +36,23 @@ CREATE TABLE eventos (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Crear tabla de mensajes del foro
+-- Corregir la tabla mensajes_foro
+DROP TABLE IF EXISTS mensajes_foro;
 CREATE TABLE mensajes_foro (
     id SERIAL PRIMARY KEY,
-    evento_id VARCHAR(255) REFERENCES eventos(id),
-    usuario_id UUID REFERENCES usuarios(id),
+    evento_id INTEGER REFERENCES eventos(id) ON DELETE CASCADE,
+    usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,
     mensaje TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Índices para mejorar el rendimiento de las consultas
+CREATE INDEX IF NOT EXISTS idx_mensajes_evento ON mensajes_foro(evento_id);
+CREATE INDEX IF NOT EXISTS idx_mensajes_usuario ON mensajes_foro(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_mensajes_fecha ON mensajes_foro(fecha_creacion);
+
+-- Permisos
+GRANT ALL PRIVILEGES ON mensajes_foro TO eventpulse_user;
 
 -- Crear índices
 CREATE INDEX idx_eventos_categoria ON eventos(categoria);
@@ -69,4 +78,17 @@ CREATE TRIGGER update_usuarios_updated_at
 CREATE TRIGGER update_eventos_updated_at
     BEFORE UPDATE ON eventos
     FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column(); 
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Insertar el usuario administrador si no existe
+INSERT INTO usuarios (id, email, nombre, username, password, rol)
+SELECT 
+    gen_random_uuid(),
+    'admin@admin.com',
+    'Administrador',
+    'admin',
+    '$2b$10$YourHashedPasswordHere',  -- Contraseña: admin123 (hasheada)
+    'admin'
+WHERE NOT EXISTS (
+    SELECT 1 FROM usuarios WHERE email = 'admin@admin.com'
+); 

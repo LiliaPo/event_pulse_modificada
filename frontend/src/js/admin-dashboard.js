@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    if (!localStorage.getItem('adminToken')) {
+    if (!localStorage.getItem('token')) {
         window.location.href = '/admin';
         return;
     }
@@ -22,7 +22,7 @@ let users = [];
 async function loadUsers() {
     try {
         console.log('Cargando usuarios...');
-        const token = localStorage.getItem('adminToken');
+        const token = localStorage.getItem('token');
         console.log('Token:', token);
         
         const response = await fetch('/api/users', {
@@ -94,7 +94,7 @@ async function editUser(userId) {
     try {
         const response = await fetch(`/api/users/${userId}`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
         const user = await response.json();
@@ -136,7 +136,7 @@ document.getElementById('editUserForm').addEventListener('submit', async functio
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             body: JSON.stringify(userData)
         });
@@ -160,7 +160,7 @@ async function deleteUser(userId) {
             const response = await fetch(`/api/users/${userId}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
 
@@ -184,7 +184,7 @@ async function loadEventos() {
     try {
         const response = await fetch('/api/events', {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
         const eventos = await response.json();
@@ -303,7 +303,7 @@ async function deleteEvento(id) {
             const response = await fetch(`/api/events/${id}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
 
@@ -347,7 +347,7 @@ document.getElementById('createEventoForm').addEventListener('submit', async fun
             method: isEdit ? 'PUT' : 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             body: JSON.stringify(eventData)
         });

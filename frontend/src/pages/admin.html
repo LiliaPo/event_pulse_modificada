@@ -41,15 +41,7 @@
         </div>
     </div>
     <script>
-        document.getElementById('adminPassword').addEventListener('input', function(e) {
-            const password = e.target.value;
-            const requirements = {
-                length: password.length >= 8,
-                upper: /[A-Z]/.test(password),
-                lower: /[a-z]/.test(password),
-                special: /[@$!%*?&]/.test(password)
-            };
-
+        
             // Actualizar el estilo del input
             e.target.classList.toggle('invalid-input', !Object.values(requirements).every(Boolean));
 
@@ -57,8 +49,7 @@
             document.getElementById('lengthCheck').style.color = requirements.length ? '#4CAF50' : '#ff6b6b';
             document.getElementById('upperCheck').style.color = requirements.upper ? '#4CAF50' : '#ff6b6b';
             document.getElementById('lowerCheck').style.color = requirements.lower ? '#4CAF50' : '#ff6b6b';
-            document.getElementById('specialCheck').style.color = requirements.special ? '#4CAF50' : '#ff6b6b';
-        });
+        document.getElementById('specialCheck').style.color = requirements.special ? '#4CAF50' : '#ff6b6b';
     </script>
     <script type="module" src="/js/admin.js"></script>
 </body>

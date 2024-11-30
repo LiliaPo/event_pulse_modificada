@@ -162,27 +162,19 @@ function initMap() {
     }).addTo(map);
 }
 
-function mostrarEventos(eventosAMostrar) {
-    const contenedorEventos = document.getElementById('eventos');
-    contenedorEventos.innerHTML = '';
-
-    eventosAMostrar.forEach(evento => {
-        const eventoElement = document.createElement('div');
-        eventoElement.classList.add('evento');
-        eventoElement.innerHTML = `
-            <div class="evento-banner" style="background-image: url('${evento.imagen}')"></div>
+function mostrarEventos(eventos) {
+    const eventosContainer = document.getElementById('eventos');
+    eventosContainer.innerHTML = eventos.map(evento => `
+        <div class="evento">
+            <div class="evento-banner" style="background-image: url('${evento.imagen || 'https://via.placeholder.com/300x150'}')"></div>
             <span class="evento-categoria categoria-${evento.categoria}">${evento.categoria}</span>
-            <h3><i class="evento-icono ${obtenerIconoCategoria(evento.categoria)}"></i>${evento.nombre}</h3>
+            <h3>${evento.nombre}</h3>
             <p><i class="fas fa-calendar"></i> ${new Date(evento.fecha).toLocaleDateString()}</p>
             <p><i class="fas fa-map-marker-alt"></i> ${evento.localizacion}</p>
-            <button class="btn-ver-mas" data-id="${evento.id}">Ver más</button>
-        `;
-        contenedorEventos.appendChild(eventoElement);
-    });
-
-    document.querySelectorAll('.btn-ver-mas').forEach(btn => {
-        btn.addEventListener('click', (e) => mostrarDetallesEvento(e.target.dataset.id));
-    });
+            <p><i class="fas fa-euro-sign"></i> ${evento.precio || 'Gratis'}</p>
+            <button class="btn-ver-mas" onclick="verDetallesEvento('${evento.id}')">Ver más</button>
+        </div>
+    `).join('');
 }
 
 function usarUbicacionActual() {

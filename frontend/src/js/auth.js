@@ -5,41 +5,27 @@ export function setupAuth() {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const username = document.getElementById('usernameLogin').value;
             const email = document.getElementById('emailLogin').value;
             const password = document.getElementById('passwordLogin').value;
 
-            console.log('Intentando login con:', { username, email });
+            const response = await fetch('/api/auth/admin/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
 
-            try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, email, password })
-                });
-
-                console.log('Respuesta del servidor:', response.status);
-
-                const data = await response.json();
-                console.log('Datos recibidos:', data);
-
-                if (response.ok) {
-                    console.log('Login exitoso, guardando datos...');
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('userId', data.user.id);
-                    localStorage.setItem('userRole', data.user.rol);
-
-                    console.log('Redirigiendo...');
-                    window.location.href = '/eventos';
-                } else {
-                    console.log('Error en login:', data.message);
-                    alert(data.message || 'Error al iniciar sesión');
-                }
-            } catch (error) {
-                console.error('Error en la petición:', error);
-                alert('Error al iniciar sesión');
+            const data = await response.json();
+            
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userId', data.user.id);
+                localStorage.setItem('userRole', data.user.rol);
+                localStorage.setItem('userName', data.user.nombre);
+                localStorage.setItem('userEmail', data.user.email);
+                
+                window.location.replace('/admin-dashboard');
             }
         });
     }
@@ -83,6 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('userId', data.user.id);
                     localStorage.setItem('userRole', data.user.rol);
+                    localStorage.setItem('userName', data.user.nombre);
+                    localStorage.setItem('userEmail', data.user.email);
                     
                     console.log('Registro exitoso, redirigiendo...');
                     window.location.href = '/eventos';
@@ -136,6 +124,14 @@ if (document.getElementById('passwordLogin')) {
 if (document.getElementById('passwordRegistro')) {
     setupPasswordValidation('passwordRegistro');
 }
-if (document.getElementById('adminPassword')) {
-    setupPasswordValidation('adminPassword');
-} 
+
+document.getElementById('emailLogin').addEventListener('input', function(e) {
+    const email = e.target.value;
+    const passwordHint = document.getElementById('passwordHint');
+    
+    if (email === 'admin@admin.com') {
+        passwordHint.style.display = 'none';
+    } else {
+        passwordHint.style.display = 'block';
+    }
+}); 
