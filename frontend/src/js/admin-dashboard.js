@@ -46,29 +46,43 @@ async function loadUsers() {
 
 function displayUsers(users) {
     const container = document.getElementById('usuariosContainer');
-    container.innerHTML = users.map(user => `
-        <div class="user-card" data-user-id="${user.id}">
-            <div class="user-header">
-                <h3>${user.nombre}</h3>
-                <span class="role">${user.rol}</span>
-            </div>
-            <div class="user-body">
-                <p><i class="fas fa-envelope"></i> ${user.email}</p>
-                <p><i class="fas fa-user"></i> ${user.username}</p>
-                ${user.telefono ? `<p><i class="fas fa-phone"></i> ${user.telefono}</p>` : ''}
-                ${user.whatsapp ? `<p><i class="fab fa-whatsapp"></i> ${user.whatsapp}</p>` : ''}
-                ${user.instagram ? `<p><i class="fab fa-instagram"></i> ${user.instagram}</p>` : ''}
-            </div>
-            <div class="user-actions">
-                <button onclick="editUser('${user.id}')" class="btn-primary">
-                    <i class="fas fa-edit"></i> Editar
-                </button>
-                <button onclick="deleteUser('${user.id}')" class="btn-danger">
-                    <i class="fas fa-trash"></i> Eliminar
-                </button>
-            </div>
-        </div>
-    `).join('');
+    container.innerHTML = `
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Teléfono</th>
+                    <th>WhatsApp</th>
+                    <th>Instagram</th>
+                    <th>Rol</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${users.map(user => `
+                    <tr data-user-id="${user.id}">
+                        <td>${user.nombre}</td>
+                        <td>${user.email}</td>
+                        <td>${user.username}</td>
+                        <td>${user.telefono || '-'}</td>
+                        <td>${user.whatsapp || '-'}</td>
+                        <td>${user.instagram || '-'}</td>
+                        <td>${user.rol}</td>
+                        <td class="actions">
+                            <button onclick="editUser('${user.id}')" class="btn-primary">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteUser('${user.id}')" class="btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
 }
 
 function closeEditModal() {
@@ -182,28 +196,41 @@ async function loadEventos() {
 
 function displayEventos(eventos) {
     const container = document.getElementById('eventosContainer');
-    container.innerHTML = eventos.map(evento => `
-        <div class="evento-card" data-event-id="${evento.id}">
-            <div class="evento-header">
-                <h3>${evento.nombre}</h3>
-                <span class="categoria">${evento.categoria}</span>
-            </div>
-            <div class="evento-body">
-                <p><i class="fas fa-calendar"></i> ${new Date(evento.fecha).toLocaleString()}</p>
-                <p><i class="fas fa-map-marker-alt"></i> ${evento.localizacion}</p>
-                <p><i class="fas fa-user"></i> ${evento.organizador}</p>
-                <p><i class="fas fa-euro-sign"></i> ${evento.precio}€</p>
-            </div>
-            <div class="evento-actions">
-                <button onclick="editEvento('${evento.id}')" class="btn-primary">
-                    <i class="fas fa-edit"></i> Editar
-                </button>
-                <button onclick="deleteEvento('${evento.id}')" class="btn-danger">
-                    <i class="fas fa-trash"></i> Eliminar
-                </button>
-            </div>
-        </div>
-    `).join('');
+    container.innerHTML = `
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Fecha</th>
+                    <th>Localización</th>
+                    <th>Organizador</th>
+                    <th>Precio</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${eventos.map(evento => `
+                    <tr data-event-id="${evento.id}">
+                        <td>${evento.nombre}</td>
+                        <td>${evento.categoria}</td>
+                        <td>${new Date(evento.fecha).toLocaleString()}</td>
+                        <td>${evento.localizacion}</td>
+                        <td>${evento.organizador}</td>
+                        <td>${evento.precio}€</td>
+                        <td class="actions">
+                            <button onclick="editEvento('${evento.id}')" class="btn-primary">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteEvento('${evento.id}')" class="btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
 }
 
 function showTab(tabName) {
