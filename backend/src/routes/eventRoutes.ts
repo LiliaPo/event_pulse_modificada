@@ -1,21 +1,13 @@
-import express, { Router, Request, Response, RequestHandler } from 'express';
-import { getAllEvents, createEvent, updateEvent, deleteEvent } from '../controllers/eventController.js';
+import express, { RequestHandler } from 'express';
+import { getAllEvents, createEvent, updateEvent, deleteEvent, getEventById } from '../controllers/eventController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
-const router: Router = express.Router();
+const router = express.Router();
 
-const handler = (fn: any): RequestHandler => 
-    async (req: Request, res: Response, next) => {
-        try {
-            await fn(req, res);
-        } catch (error) {
-            next(error);
-        }
-    };
-
-router.get('/', handler(getAllEvents));
-router.post('/', authenticateToken, handler(createEvent));
-router.put('/:id', authenticateToken, handler(updateEvent));
-router.delete('/:id', authenticateToken, handler(deleteEvent));
+router.get('/', getAllEvents as RequestHandler);
+router.get('/:id', getEventById as RequestHandler);
+router.post('/', authenticateToken, createEvent as RequestHandler);
+router.put('/:id', authenticateToken, updateEvent as RequestHandler);
+router.delete('/:id', authenticateToken, deleteEvent as RequestHandler);
 
 export default router; 

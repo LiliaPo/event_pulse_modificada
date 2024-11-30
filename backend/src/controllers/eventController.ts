@@ -1,81 +1,92 @@
-import pool from '../config/database.js';
-import { TypedRequest, TypedResponse } from '../types/types.js';
+import { Request, Response } from 'express';
+import { Event } from '../models/Event.js';
 
-export const getAllEvents = async (req: TypedRequest, res: TypedResponse) => {
+export const createEvent = async (req: Request, res: Response) => {
     try {
-        const result = await pool.query('SELECT * FROM eventos ORDER BY fecha DESC');
-        res.json(result.rows);
+        const eventData = {
+            nombre: req.body.nombre,
+            categoria: req.body.categoria,
+            fecha: req.body.fecha,
+            localizacion: req.body.localizacion,
+            organizador: req.body.organizador,
+            precio: parseFloat(req.body.precio) || 0,
+            url: req.body.url,
+            imagen: req.body.imagen,
+            subcategoria: req.body.subcategoria,
+            direccion: req.body.direccion,
+            descripcion: req.body.descripcion,
+            lat: undefined,
+            lng: undefined
+        };
+
+        console.log('Datos recibidos:', eventData); // Para debug
+
+        const newEvent = await Event.create(eventData);
+        res.status(201).json(newEvent);
+    } catch (error: any) {
+        console.error('Error detallado:', error);
+        res.status(500).json({ message: 'Error al crear el evento', error: error.message });
+    }
+};
+
+export const getAllEvents = async (req: Request, res: Response) => {
+    try {
+        const events = await Event.findAll();
+        res.json(events);
     } catch (error) {
         console.error('Error al obtener eventos:', error);
         res.status(500).json({ message: 'Error al obtener eventos' });
     }
 };
 
-export const createEvent = async (req: TypedRequest, res: TypedResponse) => {
-    try {
-        const { 
-            nombre, categoria, subcategoria, edad, 
-            personas, precio, localizacion, organizador, 
-            fecha, imagen 
-        } = req.body;
-
-        const result = await pool.query(
-            `INSERT INTO eventos (
-                nombre, categoria, subcategoria, edad, 
-                personas, precio, localizacion, organizador, 
-                fecha, imagen
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
-            RETURNING *`,
-            [nombre, categoria, subcategoria, edad, personas, 
-             precio, localizacion, organizador, fecha, imagen]
-        );
-
-        res.status(201).json(result.rows[0]);
-    } catch (error) {
-        console.error('Error al crear evento:', error);
-        res.status(500).json({ message: 'Error al crear evento' });
-    }
-};
-
-export const updateEvent = async (req: TypedRequest, res: TypedResponse) => {
+export const updateEvent = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { 
-            nombre, categoria, subcategoria, edad, 
-            personas, precio, localizacion, organizador, 
-            fecha, imagen 
-        } = req.body;
+        const eventData = {
+            nombre: req.body.nombre,
+            categoria: req.body.categoria,
+            fecha: req.body.fecha,
+            localizacion: req.body.localizacion,
+            direccion: req.body.direccion,
+            organizador: req.body.organizador,
+            precio: parseFloat(req.body.precio) || 0,
+            url: req.body.url
+        };
 
-        const result = await pool.query(
-            `UPDATE eventos 
-             SET nombre = $1, categoria = $2, subcategoria = $3, 
-                 edad = $4, personas = $5, precio = $6, 
-                 localizacion = $7, organizador = $8, 
-                 fecha = $9, imagen = $10
-             WHERE id = $11 
-             RETURNING *`,
-            [nombre, categoria, subcategoria, edad, personas, 
-             precio, localizacion, organizador, fecha, imagen, id]
-        );
-
-        if (result.rows.length === 0) {
+        const updated = await Event.update(id, eventData);
+        if (!updated) {
             return res.status(404).json({ message: 'Evento no encontrado' });
         }
-
-        res.json(result.rows[0]);
+        res.json(updated);
     } catch (error) {
         console.error('Error al actualizar evento:', error);
-        res.status(500).json({ message: 'Error al actualizar evento' });
+        res.status(500).json({ message: 'Error al actualizar el evento' });
     }
 };
 
-export const deleteEvent = async (req: { params: { id: any; }; }, res: { json: (arg0: { message: string; }) => void; status: (arg0: number) => { (): any; new(): any; json: { (arg0: { message: string; }): void; new(): any; }; }; }) => {
+export const deleteEvent = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        await pool.query('DELETE FROM eventos WHERE id = $1', [id]);
-        res.json({ message: 'Evento eliminado exitosamente' });
+        await Event.delete(id);
+        res.json({ message: 'Evento eliminado correctamente' });
     } catch (error) {
         console.error('Error al eliminar evento:', error);
-        res.status(500).json({ message: 'Error al eliminar evento' });
+        res.status(500).json({ message: 'Error al eliminar el evento' });
+    }
+};
+
+export const getEventById = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const event = await Event.findById(id);
+        
+        if (!event) {
+            return res.status(404).json({ message: 'Evento no encontrado' });
+        }
+        
+        res.json(event);
+    } catch (error) {
+        console.error('Error al obtener evento:', error);
+        res.status(500).json({ message: 'Error al obtener el evento' });
     }
 }; 

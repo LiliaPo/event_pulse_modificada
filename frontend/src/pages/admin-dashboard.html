@@ -3,31 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - EventosFiltro</title>
+    <title>Dashboard Administrador - EventosFiltro</title>
     <link rel="stylesheet" href="/css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="admin-container">
-        <nav class="admin-nav">
-            <h1>Panel de Administración</h1>
-            <button id="logoutBtn">Cerrar Sesión</button>
-        </nav>
-
-        <div class="admin-content">
-            <div class="admin-section">
-                <h2>Usuarios Registrados</h2>
-                <div id="usuariosLista" class="lista-items"></div>
-            </div>
-
-            <div class="admin-section">
-                <h2>Eventos</h2>
-                <div id="eventosLista" class="lista-items"></div>
+    <div class="container">
+        <h1>Panel de Administración</h1>
+        
+        <!-- Pestañas -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('usuarios')">Gestión de Usuarios</button>
+            <button class="tab-button" onclick="showTab('eventos')">Gestión de Eventos</button>
+        </div>
+        
+        <!-- Contenido de Usuarios -->
+        <div id="usuarios" class="tab-content active">
+            <input type="text" id="searchUser" class="search-bar" placeholder="Buscar usuario...">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Username</th>
+                        <th>Teléfono</th>
+                        <th>WhatsApp</th>
+                        <th>Instagram</th>
+                        <th>Rol</th>
+                        <th>Fecha Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <!-- Los usuarios se cargarán aquí dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Contenido de Eventos -->
+        <div id="eventos" class="tab-content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <h2>Lista de Eventos</h2>
+                        <div class="section-header">
+                            <button onclick="openCreateEventoModal()" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Crear Evento
+                            </button>
+                        </div>
+                        <div id="eventosContainer" class="eventos-grid">
+                            <!-- Aquí se mostrarán los eventos -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script type="module" src="/js/admin-dashboard.js"></script>
+    <!-- Modales -->
+    <!-- Modal para editar usuario -->
+    <div id="editModal" class="modal">
+        <!-- ... (contenido del modal de edición de usuario) ... -->
+    </div>
+
+    <!-- Modal para crear/editar evento -->
+    <div id="editEventoModal" class="modal">
+        <!-- ... (contenido del modal de edición de evento) ... -->
+    </div>
+
+    <!-- Modal para crear evento -->
+    <div id="createEventoModal" class="modal">
+        <div class="modal-contenido">
+            <span class="close" onclick="closeCreateEventoModal()">&times;</span>
+            <h2>Crear Nuevo Evento</h2>
+            <form id="createEventoForm">
+                <div class="form-group">
+                    <label for="createEventoNombre">Nombre:</label>
+                    <input type="text" id="createEventoNombre" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="createEventoCategoria">Categoría:</label>
+                    <select id="createEventoCategoria" class="form-control" required>
+                        <option value="">Selecciona categoría</option>
+                        <option value="musica">Música</option>
+                        <option value="deporte">Deporte</option>
+                        <option value="arte">Arte</option>
+                        <option value="cine">Cine</option>
+                        <option value="cafeteria">Cafetería</option>
+                        <option value="restaurante">Restaurante</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="createEventoFecha">Fecha:</label>
+                    <input type="datetime-local" id="createEventoFecha" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="createEventoLocalizacion">Localización:</label>
+                    <input type="text" id="createEventoLocalizacion" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="createEventoDireccion">Dirección:</label>
+                    <input type="text" id="createEventoDireccion" class="form-control" placeholder="Calle, número, código postal...">
+                </div>
+                <div class="form-group">
+                    <label for="createEventoOrganizador">Organizador:</label>
+                    <input type="text" id="createEventoOrganizador" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="createEventoPrecio">Precio (€):</label>
+                    <div class="input-group">
+                        <input type="number" id="createEventoPrecio" class="form-control" step="0.01" required>
+                        <span class="input-suffix">€</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="createEventoUrl">URL del Evento:</label>
+                    <input type="url" id="createEventoUrl" class="form-control" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label for="createEventoImagen">Imagen del Evento:</label>
+                    <input type="file" id="createEventoImagen" class="form-control" accept="image/*">
+                </div>
+                <button type="submit" class="btn btn-primary">Crear Evento</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/admin-dashboard.js"></script>
 </body>
 </html> 

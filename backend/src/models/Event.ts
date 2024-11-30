@@ -1,46 +1,64 @@
 import { Pool } from 'pg';
 import pool from '../config/database.js';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface IEvent {
     id?: string;
     nombre: string;
     categoria: string;
     subcategoria?: string;
-    edad?: string;
-    personas: number;
-    precio?: number;
-    localizacion: string;
-    organizador: string;
     fecha: Date;
+    localizacion: string;
+    direccion?: string;
     imagen?: string;
+    descripcion?: string;
+    organizador: string;
+    precio?: number;
+    url?: string;
+    lat?: number;
+    lng?: number;
+    valoracion?: number;
 }
 
 export class Event {
     static async create(eventData: IEvent) {
         const query = `
             INSERT INTO eventos (
-                nombre, categoria, subcategoria, edad,
-                personas, precio, localizacion, organizador,
-                fecha, imagen
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                id, nombre, categoria, subcategoria, fecha,
+                localizacion, direccion, imagen, descripcion,
+                organizador, precio, url, lat, lng, usuario_id
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9,
+                $10, $11, $12, $13, $14, $15
+            )
             RETURNING *
         `;
 
         const values = [
+            uuidv4(),
             eventData.nombre,
             eventData.categoria,
-            eventData.subcategoria,
-            eventData.edad,
-            eventData.personas,
-            eventData.precio,
-            eventData.localizacion,
-            eventData.organizador,
+            eventData.subcategoria || null,
             eventData.fecha,
-            eventData.imagen
+            eventData.localizacion,
+            eventData.direccion || null,
+            eventData.imagen || null,
+            eventData.descripcion || null,
+            eventData.organizador,
+            eventData.precio || 0,
+            eventData.url || null,
+            eventData.lat || null,
+            eventData.lng || null,
+            null  // usuario_id
         ];
 
-        const result = await pool.query(query, values);
-        return result.rows[0];
+        try {
+            const result = await pool.query(query, values);
+            return result.rows[0];
+        } catch (error) {
+            console.error('Error SQL:', error);
+            throw error;
+        }
     }
 
     static async findAll() {
@@ -61,14 +79,18 @@ export class Event {
             SET nombre = COALESCE($1, nombre),
                 categoria = COALESCE($2, categoria),
                 subcategoria = COALESCE($3, subcategoria),
-                edad = COALESCE($4, edad),
-                personas = COALESCE($5, personas),
-                precio = COALESCE($6, precio),
-                localizacion = COALESCE($7, localizacion),
-                organizador = COALESCE($8, organizador),
-                fecha = COALESCE($9, fecha),
-                imagen = COALESCE($10, imagen)
-            WHERE id = $11
+                fecha = COALESCE($4, fecha),
+                localizacion = COALESCE($5, localizacion),
+                direccion = COALESCE($6, direccion),
+                imagen = COALESCE($7, imagen),
+                descripcion = COALESCE($8, descripcion),
+                organizador = COALESCE($9, organizador),
+                precio = COALESCE($10, precio),
+                url = COALESCE($11, url),
+                lat = COALESCE($12, lat),
+                lng = COALESCE($13, lng),
+                valoracion = COALESCE($14, valoracion)
+            WHERE id = $15
             RETURNING *
         `;
 
@@ -76,13 +98,17 @@ export class Event {
             eventData.nombre,
             eventData.categoria,
             eventData.subcategoria,
-            eventData.edad,
-            eventData.personas,
-            eventData.precio,
-            eventData.localizacion,
-            eventData.organizador,
             eventData.fecha,
+            eventData.localizacion,
+            eventData.direccion,
             eventData.imagen,
+            eventData.descripcion,
+            eventData.organizador,
+            eventData.precio,
+            eventData.url,
+            eventData.lat,
+            eventData.lng,
+            eventData.valoracion,
             id
         ];
 

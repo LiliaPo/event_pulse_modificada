@@ -1,34 +1,35 @@
 document.addEventListener('DOMContentLoaded', () => {
     const adminLoginForm = document.getElementById('adminLoginForm');
-    const errorMessage = document.getElementById('errorMessage');
 
     adminLoginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const email = document.getElementById('adminEmail').value;
         const password = document.getElementById('adminPassword').value;
-
+        
         try {
             const response = await fetch('/api/auth/admin/login', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ email, password })
             });
 
             const data = await response.json();
 
-            if (response.ok) {
+            if (data.success) {
                 localStorage.setItem('adminToken', data.token);
                 window.location.href = '/admin-dashboard';
             } else {
-                errorMessage.textContent = data.message;
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.textContent = 'Credenciales inválidas';
                 errorMessage.style.display = 'block';
             }
         } catch (error) {
             console.error('Error:', error);
-            errorMessage.textContent = 'Error de conexión';
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = 'Error al intentar iniciar sesión';
             errorMessage.style.display = 'block';
         }
     });

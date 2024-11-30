@@ -16,7 +16,7 @@ CREATE TABLE usuarios (
 
 -- Crear tabla de eventos
 CREATE TABLE eventos (
-    id VARCHAR(255) PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     categoria VARCHAR(50) NOT NULL,
     subcategoria VARCHAR(50),
