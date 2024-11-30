@@ -2,6 +2,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import pool from '../config/database.js';
 import { TypedRequest, TypedResponse, User } from '../types/types.js';
+import { Request, Response, NextFunction } from 'express';
+import { RequestHandler } from 'express-serve-static-core';
 
 export const login = async (req: TypedRequest, res: TypedResponse) => {
     try {
@@ -26,7 +28,7 @@ export const login = async (req: TypedRequest, res: TypedResponse) => {
         const token = jwt.sign(
             { id: user.id, email: user.email, rol: user.rol },
             process.env.JWT_SECRET || 'tu_clave_secreta',
-            { expiresIn: '24h' }
+            { expiresIn: '96h' }
         );
 
         res.json({
@@ -44,23 +46,51 @@ export const login = async (req: TypedRequest, res: TypedResponse) => {
     }
 };
 
-export const register = async (req: TypedRequest, res: TypedResponse) => {
+export const register: RequestHandler = async (req, res, next) => {
     try {
         const { email, password, nombre, username } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Verificar si el usuario ya existe
+        const existingUser = await pool.query(
+            'SELECT * FROM usuarios WHERE email = $1 OR username = $2',
+            [email, username]
+        );
+
+        if (existingUser.rows.length > 0) {
+            res.status(400).json({
+                message: 'El email o nombre de usuario ya está registrado'
+            });
+            return;
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
         const result = await pool.query(
-            'INSERT INTO usuarios (email, password, nombre, username) VALUES ($1, $2, $3, $4) RETURNING id, email, nombre',
+            `INSERT INTO usuarios (id, email, password, nombre, username, rol, created_at, updated_at)
+             VALUES (gen_random_uuid(), $1, $2, $3, $4, 'usuario', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+             RETURNING id, email, nombre, username, rol`,
             [email, hashedPassword, nombre, username]
+        );
+
+        const user = result.rows[0];
+        const token = jwt.sign(
+            { id: user.id, email: user.email, rol: user.rol },
+            process.env.JWT_SECRET || 'tu_clave_secreta',
+            { expiresIn: '24h' }
         );
 
         res.status(201).json({
             message: 'Usuario registrado exitosamente',
-            user: result.rows[0]
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                nombre: user.nombre,
+                username: user.username,
+                rol: user.rol
+            }
         });
     } catch (error) {
-        console.error('Error en registro:', error);
-        res.status(500).json({ message: 'Error en el registro' });
+        next(error);
     }
 };
 
