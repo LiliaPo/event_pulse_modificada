@@ -21,47 +21,71 @@ let users = [];
 
 async function loadUsers() {
     try {
-        const response = await fetch('/api/users/all');
-        users = await response.json();
+        console.log('Cargando usuarios...');
+        const token = localStorage.getItem('adminToken');
+        console.log('Token:', token);
+        
+        const response = await fetch('/api/users', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        console.log('Respuesta status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const users = await response.json();
+        console.log('Usuarios recibidos:', users);
         displayUsers(users);
     } catch (error) {
         console.error('Error al cargar usuarios:', error);
     }
 }
 
-function displayUsers(usersToShow) {
-    const tableBody = document.getElementById('usersTableBody');
-    tableBody.innerHTML = usersToShow.map(user => `
-        <tr>
-            <td>${user.id}</td>
-            <td>${user.nombre}</td>
-            <td>${user.email}</td>
-            <td>${user.username}</td>
-            <td>${user.telefono || '-'}</td>
-            <td>${user.whatsapp || '-'}</td>
-            <td>${user.instagram || '-'}</td>
-            <td>${user.rol}</td>
-            <td>${new Date(user.created_at).toLocaleDateString()}</td>
-            <td>
+function displayUsers(users) {
+    const container = document.getElementById('usuariosContainer');
+    container.innerHTML = users.map(user => `
+        <div class="user-card" data-user-id="${user.id}">
+            <div class="user-header">
+                <h3>${user.nombre}</h3>
+                <span class="role">${user.rol}</span>
+            </div>
+            <div class="user-body">
+                <p><i class="fas fa-envelope"></i> ${user.email}</p>
+                <p><i class="fas fa-user"></i> ${user.username}</p>
+                ${user.telefono ? `<p><i class="fas fa-phone"></i> ${user.telefono}</p>` : ''}
+                ${user.whatsapp ? `<p><i class="fab fa-whatsapp"></i> ${user.whatsapp}</p>` : ''}
+                ${user.instagram ? `<p><i class="fab fa-instagram"></i> ${user.instagram}</p>` : ''}
+            </div>
+            <div class="user-actions">
                 <button onclick="editUser('${user.id}')" class="btn-primary">
                     <i class="fas fa-edit"></i> Editar
                 </button>
                 <button onclick="deleteUser('${user.id}')" class="btn-danger">
                     <i class="fas fa-trash"></i> Eliminar
                 </button>
-            </td>
-        </tr>
+            </div>
+        </div>
     `).join('');
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+    document.getElementById('editUserForm').reset();
 }
 
 async function editUser(userId) {
     try {
-        const user = users.find(u => u.id === userId);
-        if (!user) return;
+        const response = await fetch(`/api/users/${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        });
+        const user = await response.json();
 
-        const editModal = document.getElementById('editModal');
-        editModal.style.display = 'block';
-
+        // Rellenar el formulario con los datos del usuario
         document.getElementById('editUserId').value = user.id;
         document.getElementById('editNombre').value = user.nombre;
         document.getElementById('editEmail').value = user.email;
@@ -70,27 +94,75 @@ async function editUser(userId) {
         document.getElementById('editWhatsapp').value = user.whatsapp || '';
         document.getElementById('editInstagram').value = user.instagram || '';
         document.getElementById('editRol').value = user.rol;
+
+        // Mostrar el modal
+        document.getElementById('editModal').style.display = 'block';
     } catch (error) {
-        console.error('Error al editar usuario:', error);
+        console.error('Error:', error);
+        alert('Error al cargar el usuario');
     }
 }
 
-async function deleteUser(userId) {
-    if (!confirm('¿Estás seguro de que quieres eliminar este usuario?')) return;
+document.getElementById('editUserForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const userId = document.getElementById('editUserId').value;
+    const userData = {
+        nombre: document.getElementById('editNombre').value,
+        email: document.getElementById('editEmail').value,
+        username: document.getElementById('editUsername').value,
+        telefono: document.getElementById('editTelefono').value,
+        whatsapp: document.getElementById('editWhatsapp').value,
+        instagram: document.getElementById('editInstagram').value,
+        rol: document.getElementById('editRol').value
+    };
 
     try {
         const response = await fetch(`/api/users/${userId}`, {
-            method: 'DELETE'
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            },
+            body: JSON.stringify(userData)
         });
 
         if (response.ok) {
-            await loadUsers();
+            closeEditModal();
+            await loadUsers(); // Recargar la lista de usuarios
+            alert('Usuario actualizado exitosamente');
         } else {
-            alert('Error al eliminar usuario');
+            throw new Error('Error al actualizar usuario');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error al eliminar usuario');
+        alert(error.message);
+    }
+});
+
+async function deleteUser(userId) {
+    if (confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
+        try {
+            const response = await fetch(`/api/users/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                }
+            });
+
+            if (response.ok) {
+                const userElement = document.querySelector(`[data-user-id="${userId}"]`);
+                if (userElement) {
+                    userElement.remove();
+                }
+                alert('Usuario eliminado correctamente');
+            } else {
+                throw new Error('Error al eliminar usuario');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message);
+        }
     }
 }
 

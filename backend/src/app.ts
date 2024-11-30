@@ -4,7 +4,7 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import authRoutes from './routes/authRoutes';
 import eventRoutes from './routes/eventRoutes';
-import userRoutes from './routes/userRoutes';
+import userRoutes from './routes/userRoutes.js';
 
 // Configurar __dirname para ES modules
 const __filename = fileURLToPath(import.meta.url);

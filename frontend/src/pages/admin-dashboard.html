@@ -20,26 +20,9 @@
         
         <!-- Contenido de Usuarios -->
         <div id="usuarios" class="tab-content active">
-            <input type="text" id="searchUser" class="search-bar" placeholder="Buscar usuario...">
-            <table class="users-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Username</th>
-                        <th>Teléfono</th>
-                        <th>WhatsApp</th>
-                        <th>Instagram</th>
-                        <th>Rol</th>
-                        <th>Fecha Registro</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="usersTableBody">
-                    <!-- Los usuarios se cargarán aquí dinámicamente -->
-                </tbody>
-            </table>
+            <div id="usuariosContainer">
+                <!-- Aquí se cargarán los usuarios -->
+            </div>
         </div>
         
         <!-- Contenido de Eventos -->
@@ -65,7 +48,45 @@
     <!-- Modales -->
     <!-- Modal para editar usuario -->
     <div id="editModal" class="modal">
-        <!-- ... (contenido del modal de edición de usuario) ... -->
+        <div class="modal-contenido">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <h2>Editar Usuario</h2>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label for="editNombre">Nombre:</label>
+                    <input type="text" id="editNombre" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email:</label>
+                    <input type="email" id="editEmail" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editUsername">Username:</label>
+                    <input type="text" id="editUsername" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editTelefono">Teléfono:</label>
+                    <input type="tel" id="editTelefono" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="editWhatsapp">WhatsApp:</label>
+                    <input type="tel" id="editWhatsapp" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="editInstagram">Instagram:</label>
+                    <input type="text" id="editInstagram" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="editRol">Rol:</label>
+                    <select id="editRol" class="form-control" required>
+                        <option value="usuario">Usuario</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </form>
+        </div>
     </div>
 
     <!-- Modal para crear/editar evento -->

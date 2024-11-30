@@ -804,3 +804,51 @@ select.form-control {
     width: 100%;
     max-width: none;
 }
+
+/* Estilos para las tarjetas de usuario */
+.user-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.user-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.user-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.user-header .role {
+    background: #3498db;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.user-body p {
+    margin: 8px 0;
+    color: #666;
+}
+
+.user-body i {
+    width: 20px;
+    margin-right: 8px;
+    color: #3498db;
+}
+
+.user-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
