@@ -26,12 +26,8 @@ function initMap() {
         L.latLng(43.8, 4.4)    // Esquina noreste
     );
     map.setMaxBounds(bounds);
-    map.setMinZoom(5);  // Zoom mínimo para ver España
-    map.setMaxZoom(18); // Zoom máximo para detalles
-
-    map.on('drag', function() {
-        map.panInsideBounds(bounds, { animate: false });
-    });
+    map.setMinZoom(5);
+    map.setMaxZoom(18);
 }
 
 // Función para cargar eventos desde la API
@@ -112,66 +108,114 @@ function verDetallesEvento(eventoId) {
     }
 }
 
+// Función mejorada para geocodificar direcciones
+async function geocodificarDireccion(direccion) {
+    try {
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?` + 
+            `format=json&q=${encodeURIComponent(direccion + ', España')}` +
+            `&countrycodes=es&limit=1&addressdetails=1&namedetails=1`
+        );
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+            console.log('Localización encontrada:', data[0]);
+            return {
+                lat: parseFloat(data[0].lat),
+                lng: parseFloat(data[0].lon)
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('Error al geocodificar:', error);
+        return null;
+    }
+}
+
+// Función mejorada para usar ubicación actual
 function usarUbicacionActual() {
     if ("geolocation" in navigator) {
         const btnUbicacion = document.getElementById('ubicacionActual');
         btnUbicacion.disabled = true;
         btnUbicacion.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obteniendo ubicación...';
 
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        };
+
         navigator.geolocation.getCurrentPosition(
-            function(position) {
+            async function(position) {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
 
-                // Centrar el mapa en la ubicación actual
-                map.setView([lat, lng], 13);
+                try {
+                    // Obtener el nombre de la ciudad usando geocodificación inversa
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?` +
+                        `format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+                    );
+                    const data = await response.json();
+                    
+                    if (data.address) {
+                        const ciudad = data.address.city || data.address.town || data.address.village;
+                        if (ciudad) {
+                            document.getElementById('localizacion').value = ciudad;
+                            filtrarEventos();
+                        }
+                    }
 
-                // Si existe un marcador anterior, eliminarlo
-                if (userMarker) {
-                    map.removeLayer(userMarker);
+                    // Centrar el mapa en la ubicación actual
+                    map.setView([lat, lng], 15);
+
+                    // Si existe un marcador anterior, eliminarlo
+                    if (userMarker) {
+                        map.removeLayer(userMarker);
+                    }
+
+                    // Crear nuevo marcador con la ubicación actual
+                    userMarker = L.marker([lat, lng], {
+                        icon: L.divIcon({
+                            className: 'ubicacion-actual',
+                            html: '<i class="fas fa-user-circle"></i>',
+                            iconSize: [30, 30]
+                        })
+                    }).addTo(map)
+                    .bindPopup('Tu ubicación actual')
+                    .openPopup();
+
+                } catch (error) {
+                    console.error('Error al obtener detalles de ubicación:', error);
                 }
-
-                // Crear nuevo marcador con la ubicación actual
-                userMarker = L.marker([lat, lng], {
-                    icon: L.divIcon({
-                        className: 'ubicacion-actual',
-                        html: '<i class="fas fa-user-circle"></i>',
-                        iconSize: [30, 30]
-                    })
-                }).addTo(map)
-                .bindPopup('¡Estás aquí!')
-                .openPopup();
 
                 btnUbicacion.disabled = false;
                 btnUbicacion.innerHTML = '<i class="fas fa-map-marker-alt"></i> Usar ubicación actual';
             },
             function(error) {
-                let mensaje = 'No pudimos obtener tu ubicación. ';
+                console.error('Error de geolocalización:', error);
+                let mensaje = 'Error al obtener tu ubicación: ';
                 switch(error.code) {
                     case error.PERMISSION_DENIED:
-                        mensaje += 'Has denegado el permiso de ubicación.';
+                        mensaje += 'Permiso denegado';
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        mensaje += 'La información de ubicación no está disponible.';
+                        mensaje += 'Ubicación no disponible';
                         break;
                     case error.TIMEOUT:
-                        mensaje += 'Se agotó el tiempo de espera para obtener la ubicación.';
+                        mensaje += 'Tiempo de espera agotado';
                         break;
                     default:
-                        mensaje += 'Ocurrió un error desconocido.';
+                        mensaje += 'Error desconocido';
                 }
                 alert(mensaje);
                 btnUbicacion.disabled = false;
                 btnUbicacion.innerHTML = '<i class="fas fa-map-marker-alt"></i> Usar ubicación actual';
             },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-            }
+            options
         );
     } else {
-        alert('Lo sentimos, tu navegador no soporta geolocalización');
+        alert('Tu navegador no soporta geolocalización');
     }
 }
 
@@ -200,32 +244,56 @@ function cerrarPerfil() {
     }
 }
 
+// Unificar todos los event listeners en un solo DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM Cargado');
     
+    // Inicializar mapa y cargar eventos
     initMap();
     cargarEventos();
     
-    const btnPerfil = document.getElementById('mostrarPerfil');
-    console.log('Botón perfil encontrado:', btnPerfil); // Debug
-    
-    if (btnPerfil) {
-        console.log('Añadiendo event listener al botón'); // Debug
-        btnPerfil.onclick = function(e) {
-            e.preventDefault();
-            console.log('Botón clickeado'); // Debug
-            mostrarPerfil();
-        };
-    } else {
-        console.error('No se encontró el botón de perfil');
+    // Event listeners para filtros
+    const filtros = {
+        categoria: document.getElementById('categoria'),
+        localizacion: document.getElementById('localizacion'),
+        fechaInicio: document.getElementById('fechaEventoInicio'),
+        fechaFin: document.getElementById('fechaEventoFin'),
+        ubicacionBtn: document.getElementById('ubicacionActual'),
+        filtrarBtn: document.getElementById('filtrar')
+    };
+
+    // Añadir event listeners para filtros
+    if (filtros.categoria) {
+        filtros.categoria.addEventListener('change', filtrarEventos);
+    }
+    if (filtros.localizacion) {
+        filtros.localizacion.addEventListener('input', filtrarEventos);
+    }
+    if (filtros.fechaInicio) {
+        filtros.fechaInicio.addEventListener('change', filtrarEventos);
+    }
+    if (filtros.fechaFin) {
+        filtros.fechaFin.addEventListener('change', filtrarEventos);
+    }
+    if (filtros.ubicacionBtn) {
+        filtros.ubicacionBtn.addEventListener('click', usarUbicacionActual);
+    }
+    if (filtros.filtrarBtn) {
+        filtros.filtrarBtn.addEventListener('click', filtrarEventos);
     }
 
-    // Añadir event listener para cerrar el modal
+    // Event listeners para perfil
+    const btnPerfil = document.getElementById('mostrarPerfil');
+    if (btnPerfil) {
+        btnPerfil.onclick = function(e) {
+            e.preventDefault();
+            mostrarPerfil();
+        };
+    }
+
     const btnCerrar = document.querySelector('#ventanaPerfil .cerrar');
     if (btnCerrar) {
-        btnCerrar.onclick = function() {
-            cerrarPerfil();
-        };
+        btnCerrar.onclick = cerrarPerfil;
     }
 
     // Cerrar modal al hacer clic fuera
@@ -236,13 +304,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Restaurar la inicialización del mapa y eventos
-    initMap();
-    mostrarEventos(eventos);
-    mostrarEventosEnMapa(eventos);
-    actualizarSubcategorias();
+    console.log('Event listeners configurados');
 });
 
+// Función mejorada para mostrar eventos en el mapa
 function mostrarEventosEnMapa(eventos) {
     if (!map) return;
 
@@ -253,81 +318,65 @@ function mostrarEventosEnMapa(eventos) {
         }
     });
 
-    // Crear un grupo para los marcadores
-    const markers = [];
-    const procesarEventos = async () => {
-        for (const evento of eventos) {
-            let coords;
-            if (evento.lat && evento.lng) {
-                coords = { lat: evento.lat, lng: evento.lng };
-            } else {
-                coords = await geocodificarDireccion(evento.localizacion);
-            }
+    // Grupo para todos los marcadores
+    const markersGroup = L.featureGroup();
 
-            if (coords) {
-                // Crear icono personalizado según la categoría
-                const icon = L.divIcon({
-                    className: 'custom-div-icon',
-                    html: `<div class="marker-pin ${evento.categoria}">
-                            <i class="${obtenerIconoCategoria(evento.categoria)}"></i>
-                          </div>`,
-                    iconSize: [30, 42],
-                    iconAnchor: [15, 42]
-                });
-
-                const marker = L.marker([coords.lat, coords.lng], { icon })
-                    .bindPopup(`
-                        <div class="evento-popup">
-                            <h3>${evento.nombre}</h3>
-                            <p><i class="fas fa-calendar"></i> ${new Date(evento.fecha).toLocaleDateString()}</p>
-                            <p><i class="fas fa-map-marker-alt"></i> ${evento.localizacion}</p>
-                            <p><i class="fas fa-tag"></i> ${evento.categoria}</p>
-                            ${evento.telefono_contacto ? `<p><i class="fas fa-phone"></i> <a href="tel:${evento.telefono_contacto}">${evento.telefono_contacto}</a></p>` : ''}
-                            <button onclick="centrarEnEvento(${coords.lat}, ${coords.lng})" class="btn-ver-ubicacion">
-                                Ver ubicación
-                            </button>
-                        </div>
-                    `);
-                markers.push(marker);
-                marker.addTo(map);
-            }
+    // Procesar cada evento
+    eventos.forEach(async (evento) => {
+        let coords;
+        if (evento.lat && evento.lng) {
+            coords = { lat: evento.lat, lng: evento.lng };
+        } else {
+            coords = await geocodificarDireccion(evento.direccion || evento.localizacion);
         }
-    };
 
-    procesarEventos();
+        if (coords) {
+            // Crear icono personalizado según la categoría
+            const icon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="marker-pin ${evento.categoria}">
+                        <i class="${obtenerIconoCategoria(evento.categoria)}"></i>
+                      </div>`,
+                iconSize: [30, 42],
+                iconAnchor: [15, 42],
+                popupAnchor: [0, -42]
+            });
+
+            // Crear marcador
+            const marker = L.marker([coords.lat, coords.lng], { icon })
+                .bindPopup(`
+                    <div class="evento-popup">
+                        <h3>${evento.nombre}</h3>
+                        <p><i class="fas fa-calendar"></i> ${new Date(evento.fecha).toLocaleDateString()}</p>
+                        <p><i class="fas fa-map-marker-alt"></i> ${evento.direccion || evento.localizacion}</p>
+                        <p><i class="fas fa-tag"></i> ${evento.categoria}</p>
+                        ${evento.descripcion ? `<p><i class="fas fa-info-circle"></i> ${evento.descripcion}</p>` : ''}
+                        ${evento.telefono_contacto ? `<p><i class="fas fa-phone"></i> ${evento.telefono_contacto}</p>` : ''}
+                        <button onclick="centrarEnEvento(${coords.lat}, ${coords.lng})" class="btn-ver-ubicacion">
+                            Ver ubicación
+                        </button>
+                    </div>
+                `);
+
+            markersGroup.addLayer(marker);
+        }
+    });
+
+    // Añadir grupo al mapa
+    markersGroup.addTo(map);
+
+    // Ajustar vista a todos los marcadores si hay alguno
+    if (markersGroup.getLayers().length > 0) {
+        map.fitBounds(markersGroup.getBounds().pad(0.1));
+    }
 }
 
-// Función para centrar el mapa en un evento específico
+// Función para centrar el mapa en una ubicación específica
 function centrarEnEvento(lat, lng) {
-    map.setView([lat, lng], 15, {
+    map.setView([lat, lng], 16, {
         animate: true,
         duration: 1
     });
-}
-
-// Función para geocodificar direcciones
-async function geocodificarDireccion(direccion) {
-    try {
-        const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?` + 
-            `format=json&q=${encodeURIComponent(direccion)},España` +
-            `&countrycodes=es&limit=1&addressdetails=1`
-        );
-        const data = await response.json();
-        
-        if (data && data.length > 0) {
-            console.log('Localización encontrada:', data[0]);
-            return {
-                lat: parseFloat(data[0].lat),
-                lng: parseFloat(data[0].lon)
-            };
-        }
-        console.log('No se encontró la localización para:', direccion);
-        return null;
-    } catch (error) {
-        console.error('Error al geocodificar:', error);
-        return null;
-    }
 }
 
 function obtenerIconoCategoria(categoria) {
@@ -342,23 +391,192 @@ function obtenerIconoCategoria(categoria) {
     return iconos[categoria] || 'fas fa-calendar-alt';
 }
 
-function filtrarEventos() {
+// Función de filtrado actualizada
+async function filtrarEventos() {
+    console.log('Filtrando eventos...'); // Debug
     const categoria = document.getElementById('categoria').value;
-    const localizacion = document.getElementById('localizacion').value.toLowerCase();
+    const localizacion = document.getElementById('localizacion').value;
     const fechaInicio = document.getElementById('fechaEventoInicio').value;
     const fechaFin = document.getElementById('fechaEventoFin').value;
 
+    console.log('Valores de filtros:', { categoria, localizacion, fechaInicio, fechaFin }); // Debug
+
+    // Filtrar eventos
     const eventosFiltrados = eventos.filter(evento => {
         const fechaEvento = new Date(evento.fecha);
-        return (!categoria || evento.categoria === categoria) &&
-               (!localizacion || evento.localizacion.toLowerCase().includes(localizacion)) &&
-               (!fechaInicio || fechaEvento >= new Date(fechaInicio)) &&
-               (!fechaFin || fechaEvento <= new Date(fechaFin));
+        const cumpleFiltros = 
+            (!categoria || evento.categoria === categoria) &&
+            (!localizacion || evento.localizacion.toLowerCase().includes(localizacion.toLowerCase())) &&
+            (!fechaInicio || fechaEvento >= new Date(fechaInicio)) &&
+            (!fechaFin || fechaEvento <= new Date(fechaFin));
+        return cumpleFiltros;
     });
 
+    console.log('Eventos filtrados:', eventosFiltrados.length); // Debug
+
+    // Si hay una localización, intentar centrar el mapa
+    if (localizacion) {
+        const coords = await geocodificarDireccion(localizacion);
+        if (coords) {
+            map.setView([coords.lat, coords.lng], 13);
+        }
+    }
+
+    // Mostrar eventos filtrados
     mostrarEventos(eventosFiltrados);
     mostrarEventosEnMapa(eventosFiltrados);
 }
 
-// Añadir evento change al select de categorías
-document.getElementById('categoria').addEventListener('change', filtrarEventos);
+// Función para editar evento
+window.editEvento = async function(eventoId) {
+    try {
+        const response = await fetch(`/api/events/${eventoId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al obtener evento');
+        }
+
+        const evento = await response.json();
+        
+        // Limpiar cualquier ID anterior que pudiera existir
+        const oldIdInput = document.getElementById('eventoId');
+        if (oldIdInput) {
+            oldIdInput.remove();
+        }
+
+        // Rellenar el formulario
+        const form = document.getElementById('eventoForm');
+        form.reset(); // Limpiar el formulario primero
+
+        document.getElementById('nombreEvento').value = evento.nombre || '';
+        document.getElementById('categoriaEvento').value = evento.categoria || '';
+        document.getElementById('fechaEvento').value = evento.fecha ? new Date(evento.fecha).toISOString().slice(0, 16) : '';
+        document.getElementById('localizacionEvento').value = evento.localizacion || '';
+        document.getElementById('direccionEvento').value = evento.direccion || '';
+        document.getElementById('descripcionEvento').value = evento.descripcion || '';
+        document.getElementById('telefonoEvento').value = evento.telefono_contacto || '';
+        document.getElementById('organizadorEvento').value = evento.organizador || '';
+        document.getElementById('precioEvento').value = evento.precio || 0;
+
+        // Crear y añadir el campo oculto con el ID
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.id = 'eventoId';
+        idInput.name = 'eventoId'; // Añadir name también
+        idInput.value = evento.id;
+        form.appendChild(idInput);
+
+        // Mostrar el modal
+        const modal = document.getElementById('eventoModal');
+        if (modal) {
+            document.querySelector('#eventoModal h2').textContent = 'Editar Evento';
+            modal.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al cargar los datos del evento');
+    }
+}
+
+// Manejador del formulario
+document.getElementById('eventoForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const form = e.target;
+    const eventoId = form.querySelector('#eventoId')?.value;
+    const isEdit = !!eventoId;
+
+    console.log('Modo:', isEdit ? 'edición' : 'creación');
+    console.log('ID del evento:', eventoId);
+
+    const eventoData = {
+        nombre: form.querySelector('#nombreEvento').value.trim(),
+        categoria: form.querySelector('#categoriaEvento').value,
+        fecha: form.querySelector('#fechaEvento').value,
+        localizacion: form.querySelector('#localizacionEvento').value.trim(),
+        direccion: form.querySelector('#direccionEvento').value.trim(),
+        descripcion: form.querySelector('#descripcionEvento').value.trim(),
+        telefono_contacto: form.querySelector('#telefonoEvento').value.trim(),
+        organizador: form.querySelector('#organizadorEvento').value.trim(),
+        precio: parseFloat(form.querySelector('#precioEvento').value) || 0
+    };
+
+    try {
+        const url = isEdit ? `/api/events/${eventoId}` : '/api/events';
+        const method = isEdit ? 'PUT' : 'POST';
+
+        console.log('URL:', url);
+        console.log('Método:', method);
+        console.log('Datos a enviar:', eventoData);
+
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(eventoData)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || `Error al ${isEdit ? 'actualizar' : 'crear'} el evento`);
+        }
+
+        // Limpiar formulario y cerrar modal
+        form.reset();
+        const idInput = form.querySelector('#eventoId');
+        if (idInput) {
+            idInput.remove();
+        }
+
+        const modal = document.getElementById('eventoModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.querySelector('#eventoModal h2').textContent = 'Crear Evento';
+        }
+
+        // Recargar eventos
+        await cargarEventos();
+        
+        // Mensaje específico según la acción realizada
+        if (isEdit) {
+            alert(`El evento "${eventoData.nombre}" ha sido actualizado correctamente`);
+        } else {
+            alert(`El evento "${eventoData.nombre}" ha sido creado correctamente`);
+        }
+    } catch (error) {
+        console.error('Error completo:', error);
+        alert(error.message);
+    }
+});
+
+// Función para eliminar evento
+window.deleteEvento = async function(eventoId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este evento?')) return;
+
+    try {
+        const response = await fetch(`/api/events/${eventoId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.message || 'Error al eliminar evento');
+        }
+
+        await cargarEventos();
+        alert('Evento eliminado correctamente');
+    } catch (error) {
+        console.error('Error:', error);
+        alert(error.message);
+    }
+}

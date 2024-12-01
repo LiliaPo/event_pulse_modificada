@@ -1,94 +1,36 @@
--- Crear tabla de usuarios
-CREATE TABLE usuarios (
-    id UUID PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    nombre VARCHAR(255) NOT NULL,
-    username VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    telefono VARCHAR(20),
-    whatsapp VARCHAR(20),
-    instagram VARCHAR(255),
-    imagen_perfil TEXT,
-    rol VARCHAR(20) DEFAULT 'usuario',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+-- Eliminar la tabla si existe
+DROP TABLE IF EXISTS eventos CASCADE;
 
--- Crear tabla de eventos
+-- Crear la tabla con la estructura correcta
 CREATE TABLE eventos (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     categoria VARCHAR(50) NOT NULL,
-    subcategoria VARCHAR(50),
-    fecha TIMESTAMP WITH TIME ZONE NOT NULL,
+    fecha TIMESTAMP NOT NULL,
     localizacion VARCHAR(255) NOT NULL,
     direccion TEXT,
-    imagen TEXT,
     descripcion TEXT,
-    organizador VARCHAR(255) NOT NULL,
-    precio DECIMAL(10,2),
-    url TEXT,
-    lat DECIMAL(10,8),
-    lng DECIMAL(11,8),
-    usuario_id UUID REFERENCES usuarios(id),
-    valoracion DECIMAL(3,1),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    telefono_contacto VARCHAR(20),  -- Añadida esta columna
+    organizador VARCHAR(255),
+    precio DECIMAL(10,2) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Corregir la tabla mensajes_foro
-DROP TABLE IF EXISTS mensajes_foro;
-CREATE TABLE mensajes_foro (
-    id SERIAL PRIMARY KEY,
-    evento_id INTEGER REFERENCES eventos(id) ON DELETE CASCADE,
-    usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,
-    mensaje TEXT NOT NULL,
-    fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Índices para mejorar el rendimiento de las consultas
-CREATE INDEX IF NOT EXISTS idx_mensajes_evento ON mensajes_foro(evento_id);
-CREATE INDEX IF NOT EXISTS idx_mensajes_usuario ON mensajes_foro(usuario_id);
-CREATE INDEX IF NOT EXISTS idx_mensajes_fecha ON mensajes_foro(fecha_creacion);
-
--- Permisos
-GRANT ALL PRIVILEGES ON mensajes_foro TO eventpulse_user;
-
--- Crear índices
-CREATE INDEX idx_eventos_categoria ON eventos(categoria);
-CREATE INDEX idx_eventos_fecha ON eventos(fecha);
-CREATE INDEX idx_eventos_usuario_id ON eventos(usuario_id);
-CREATE INDEX idx_mensajes_evento_id ON mensajes_foro(evento_id);
-
--- Crear función para actualizar updated_at
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
--- Crear triggers para actualizar updated_at
-CREATE TRIGGER update_usuarios_updated_at
-    BEFORE UPDATE ON usuarios
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_eventos_updated_at
-    BEFORE UPDATE ON eventos
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
--- Insertar el usuario administrador si no existe
-INSERT INTO usuarios (id, email, nombre, username, password, rol)
-SELECT 
-    gen_random_uuid(),
-    'admin@admin.com',
-    'Administrador',
-    'admin',
-    '$2b$10$YourHashedPasswordHere',  -- Contraseña: admin123 (hasheada)
-    'admin'
-WHERE NOT EXISTS (
-    SELECT 1 FROM usuarios WHERE email = 'admin@admin.com'
-); 
+-- Ahora insertar los eventos
+INSERT INTO eventos (
+    nombre, 
+    categoria, 
+    fecha, 
+    localizacion, 
+    direccion, 
+    descripcion, 
+    telefono_contacto, 
+    organizador, 
+    precio
+) VALUES 
+('Concierto de Rock', 'musica', '2024-04-15 20:00:00', 'Castellón', 'Plaza Mayor 1', 'Gran concierto de rock con bandas locales', '666777888', 'Ayuntamiento de Castellón', 15.00),
+('Partido de Baloncesto', 'deporte', '2024-04-20 18:30:00', 'Castellón', 'Pabellón Municipal', 'Partido de liga local', '666999888', 'Club Baloncesto Castellón', 10.00),
+('Exposición de Arte', 'arte', '2024-04-25 10:00:00', 'Castellón', 'Museo de Bellas Artes', 'Exposición de artistas locales', '666555444', 'Museo de Castellón', 5.00),
+('Cine al aire libre', 'cine', '2024-05-01 21:30:00', 'Castellón', 'Parque Ribalta', 'Proyección de películas clásicas', '666333222', 'CineForum Castellón', 0.00),
+('Festival Gastronómico', 'restaurante', '2024-05-05 12:00:00', 'Castellón', 'Plaza Santa Clara', 'Degustación de platos típicos', '666111000', 'Asociación de Restaurantes', 25.00);

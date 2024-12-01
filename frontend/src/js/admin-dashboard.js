@@ -40,38 +40,67 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('eventoForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        const form = e.target;
+        const eventoId = form.dataset.eventoId;
+        const isEdit = !!eventoId;
+
         const eventoData = {
-            nombre: document.getElementById('nombreEvento').value,
+            nombre: document.getElementById('nombreEvento').value.trim(),
             categoria: document.getElementById('categoriaEvento').value,
             fecha: document.getElementById('fechaEvento').value,
-            localizacion: document.getElementById('localizacionEvento').value,
-            direccion: document.getElementById('direccionEvento').value,
-            descripcion: document.getElementById('descripcionEvento').value,
-            telefono_contacto: document.getElementById('telefonoEvento').value,
-            organizador: document.getElementById('organizadorEvento').value,
-            precio: parseFloat(document.getElementById('precioEvento').value)
+            localizacion: document.getElementById('localizacionEvento').value.trim(),
+            direccion: document.getElementById('direccionEvento').value.trim(),
+            descripcion: document.getElementById('descripcionEvento').value.trim(),
+            telefono_contacto: document.getElementById('telefonoEvento').value.trim(),
+            organizador: document.getElementById('organizadorEvento').value.trim(),
+            precio: parseFloat(document.getElementById('precioEvento').value) || 0
         };
 
         try {
-            const response = await fetch('/api/events', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify(eventoData)
-            });
+            console.log('Modo:', isEdit ? 'edición' : 'creación');
+            console.log('ID del evento:', eventoId);
+            console.log('Datos a enviar:', eventoData);
+
+            const response = await fetch(
+                isEdit ? `/api/events/${eventoId}` : '/api/events',
+                {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(eventoData)
+                }
+            );
+
+            const data = await response.json();
 
             if (!response.ok) {
-                throw new Error('Error al crear el evento');
+                throw new Error(data.message || `Error al ${isEdit ? 'actualizar' : 'crear'} el evento`);
             }
 
-            closeEventModal();
-            loadEventos();
-            alert('Evento creado correctamente');
+            // Limpiar formulario y resetear estado
+            form.reset();
+            delete form.dataset.eventoId;
+            document.getElementById('btnSubmitEvento').textContent = 'Crear Evento';
+
+            // Cerrar modal
+            const modal = document.getElementById('eventoModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.querySelector('#eventoModal h2').textContent = 'Crear Evento';
+            }
+
+            // Recargar eventos
+            await loadEventos();
+            
+            alert(isEdit ? 
+                `El evento "${eventoData.nombre}" ha sido actualizado correctamente` : 
+                `El evento "${eventoData.nombre}" ha sido creado correctamente`
+            );
         } catch (error) {
-            console.error('Error:', error);
-            alert('Error al crear el evento');
+            console.error('Error completo:', error);
+            alert(error.message);
         }
     });
 
@@ -168,17 +197,31 @@ function displayUsers(users) {
 // Funciones para eventos
 async function loadEventos() {
     try {
+        console.log('Iniciando carga de eventos...');
+        const token = localStorage.getItem('token');
+        console.log('Token:', token);
+
         const response = await fetch('/api/events', {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`
             }
         });
 
+        console.log('Respuesta del servidor:', response.status);
+
         if (!response.ok) {
-            throw new Error('Error al cargar eventos');
+            const errorData = await response.json();
+            console.error('Error response:', errorData);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const eventos = await response.json();
+        console.log('Eventos recibidos:', eventos);
+
+        if (!eventos || eventos.length === 0) {
+            console.log('No hay eventos para mostrar');
+        }
+
         displayEventos(eventos);
     } catch (error) {
         console.error('Error al cargar eventos:', error);
@@ -187,7 +230,15 @@ async function loadEventos() {
 
 function displayEventos(eventos) {
     const container = document.getElementById('eventosContainer');
-    if (!container) return;
+    if (!container) {
+        console.error('No se encontró el contenedor de eventos');
+        return;
+    }
+
+    if (!eventos || eventos.length === 0) {
+        container.innerHTML = '<p>No hay eventos disponibles</p>';
+        return;
+    }
 
     container.innerHTML = eventos.map(evento => `
         <div class="evento-card">
@@ -206,6 +257,22 @@ function displayEventos(eventos) {
         </div>
     `).join('');
 }
+
+// Asegúrate de que los eventos se cargan cuando se cambia a la pestaña de eventos
+document.querySelectorAll('.tab-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const tabId = button.getAttribute('data-tab');
+        if (tabId === 'eventos') {
+            loadEventos();
+        }
+    });
+});
+
+// Cargar eventos al iniciar
+document.addEventListener('DOMContentLoaded', () => {
+    // ... código existente ...
+    loadEventos(); // Asegúrate de que esta línea esté presente
+});
 
 // Funciones globales para editar/eliminar usuarios
 window.editUser = async function(userId) {
@@ -329,19 +396,64 @@ window.deleteUser = async function(userId) {
 // Funciones para eventos
 window.editEvento = async function(eventoId) {
     try {
+        const modal = document.getElementById('eventoModal');
+        const form = document.getElementById('eventoForm');
+        const submitBtn = document.getElementById('btnSubmitEvento');
+
+        if (!modal || !form || !submitBtn) {
+            throw new Error('No se encontraron los elementos necesarios');
+        }
+
         const response = await fetch(`/api/events/${eventoId}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
 
-        if (!response.ok) throw new Error('Error al obtener evento');
+        if (!response.ok) {
+            throw new Error('Error al obtener evento');
+        }
 
         const evento = await response.json();
-        showEditEventModal(evento);
+        console.log('Evento a editar:', evento);
+
+        // Limpiar formulario
+        form.reset();
+        form.dataset.eventoId = evento.id;
+
+        // Lista de campos a rellenar
+        const campos = {
+            nombreEvento: evento.nombre,
+            categoriaEvento: evento.categoria,
+            fechaEvento: evento.fecha ? new Date(evento.fecha).toISOString().slice(0, 16) : '',
+            localizacionEvento: evento.localizacion,
+            direccionEvento: evento.direccion,
+            descripcionEvento: evento.descripcion,
+            telefonoEvento: evento.telefono_contacto,
+            organizadorEvento: evento.organizador,
+            precioEvento: evento.precio || 0
+        };
+
+        // Rellenar campos
+        for (const [id, valor] of Object.entries(campos)) {
+            const elemento = document.getElementById(id);
+            if (elemento) {
+                elemento.value = valor || '';
+                console.log(`Campo ${id} rellenado con:`, valor);
+            } else {
+                console.error(`No se encontró el elemento con id: ${id}`);
+            }
+        }
+
+        // Cambiar textos
+        modal.querySelector('h2').textContent = 'Editar Evento';
+        submitBtn.textContent = 'Actualizar Evento';
+
+        // Mostrar modal
+        modal.style.display = 'block';
     } catch (error) {
-        console.error('Error:', error);
-        alert('Error al cargar los datos del evento');
+        console.error('Error detallado:', error);
+        alert('Error al cargar los datos del evento: ' + error.message);
     }
 }
 

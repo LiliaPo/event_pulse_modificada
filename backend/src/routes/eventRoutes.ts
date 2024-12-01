@@ -1,16 +1,20 @@
-import express, { RequestHandler } from 'express';
+import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { getAllEvents, createEvent, updateEvent, deleteEvent, getEventById } from '../controllers/eventController.js';
 import { authenticateToken } from '../middleware/auth.js';
-import { getEventMessages, createMessage } from '../controllers/messageController.js';
 
 const router = express.Router();
 
-router.get('/', getAllEvents);
-router.get('/:id', getEventById as RequestHandler);
-router.post('/', authenticateToken, createEvent as RequestHandler);
-router.put('/:id', authenticateToken, updateEvent as RequestHandler);
-router.delete('/:id', authenticateToken, deleteEvent as RequestHandler);
-router.get('/:eventoId/messages', authenticateToken, getEventMessages);
-router.post('/:eventoId/messages', authenticateToken, createMessage);
+// Wrapper para manejar async/await
+const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+// Rutas con el wrapper
+router.get('/', asyncHandler(getAllEvents));
+router.get('/:id', asyncHandler(getEventById));
+router.post('/', authenticateToken, asyncHandler(createEvent));
+router.put('/:id', authenticateToken, asyncHandler(updateEvent));
+router.delete('/:id', authenticateToken, asyncHandler(deleteEvent));
 
 export default router; 
