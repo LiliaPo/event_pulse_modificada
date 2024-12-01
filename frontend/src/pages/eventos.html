@@ -17,9 +17,6 @@
                 <img src="https://via.placeholder.com/35" alt="Foto de perfil" class="foto-perfil-nav">
                 Mi Perfil
             </button>
-            <button id="abrirForo" class="btn-foro">
-                <i class="fas fa-comments"></i> Foro General
-            </button>
         </nav>
 
         <div id="seccionEventos">
@@ -35,69 +32,6 @@
                         <option value="cafeteria">Cafetería</option>
                         <option value="restaurante">Restaurante</option>
                     </select>
-                    <select id="subcategoria">
-                        <option value="">Todas las subcategorías</option>
-                        <optgroup label="Música">
-                            <option value="rock">Rock</option>
-                            <option value="pop">Pop</option>
-                            <option value="jazz">Jazz</option>
-                            <option value="clasica">Clásica</option>
-                            <option value="electronica">Electrónica</option>
-                            <option value="hip-hop">Hip Hop</option>
-                            <option value="reggae">Reggae</option>
-                        </optgroup>
-                        <optgroup label="Deporte">
-                            <option value="futbol">Fútbol</option>
-                            <option value="baloncesto">Baloncesto</option>
-                            <option value="tenis">Tenis</option>
-                            <option value="natacion">Natación</option>
-                            <option value="atletismo">Atletismo</option>
-                            <option value="ciclismo">Ciclismo</option>
-                            <option value="yoga">Yoga</option>
-                        </optgroup>
-                        <optgroup label="Arte">
-                            <option value="pintura">Pintura</option>
-                            <option value="escultura">Escultura</option>
-                            <option value="fotografia">Fotografía</option>
-                            <option value="teatro">Teatro</option>
-                            <option value="danza">Danza</option>
-                            <option value="literatura">Literatura</option>
-                        </optgroup>
-                        <optgroup label="Cine">
-                            <option value="accion">Acción</option>
-                            <option value="comedia">Comedia</option>
-                            <option value="drama">Drama</option>
-                            <option value="ciencia-ficcion">Ciencia Ficción</option>
-                            <option value="terror">Terror</option>
-                            <option value="documental">Documental</option>
-                            <option value="animacion">Animación</option>
-                        </optgroup>
-                        <optgroup label="Cafetería">
-                            <option value="cafe-especialidad">Café Especialidad</option>
-                            <option value="te">Té</option>
-                            <option value="reposteria">Repostería</option>
-                            <option value="brunch">Brunch</option>
-                        </optgroup>
-                        <optgroup label="Restaurante">
-                            <option value="italiana">Italiana</option>
-                            <option value="japonesa">Japonesa</option>
-                            <option value="mexicana">Mexicana</option>
-                            <option value="vegetariana">Vegetariana</option>
-                            <option value="mariscos">Mariscos</option>
-                            <option value="parrilla">Parrilla</option>
-                            <option value="fusion">Fusión</option>
-                        </optgroup>
-                    </select>
-                    <select id="edad">
-                        <option value="">Todos los grupos de edad</option>
-                        <option value="niños">Niños</option>
-                        <option value="jovenes">Jóvenes</option>
-                        <option value="adultos">Adultos</option>
-                        <option value="tercera_edad">Tercera edad</option>
-                        <option value="todas_las_edades">Todas las edades</option>
-                    </select>
-                    <input type="number" id="personasMin" placeholder="Mín. personas" min="1">
-                    <input type="number" id="personasMax" placeholder="Máx. personas" min="1">
                     <input type="text" id="localizacion" placeholder="Localización">
                     <input type="date" id="fechaEventoInicio" placeholder="Fecha inicio">
                     <input type="date" id="fechaEventoFin" placeholder="Fecha fin">
@@ -106,74 +40,10 @@
                 </div>
             </div>
 
-            <div class="acciones-principales">
-                <button id="abrirFormulario" class="btn-agregar">
-                    <i class="fas fa-plus"></i> Añadir Nuevo Evento
-                </button>
-            </div>
-
             <div id="mapa"></div>
             <div id="eventos" class="eventos"></div>
             
             
-        </div>
-    </div>
-
-    <div id="formularioEvento" class="modal">
-        <div class="modal-contenido">
-            <span class="cerrar">&times;</span>
-            <h2>Añadir Nuevo Evento</h2>
-            <form id="nuevoEventoForm">
-                <input type="text" id="nuevoNombre" placeholder="Nombre del evento" required>
-                <div class="categoria-opciones">
-                    <label>
-                        <input type="radio" name="categoria" value="musica" required>
-                        <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Música">
-                        Música
-                    </label>
-                    <label>
-                        <input type="radio" name="categoria" value="deporte" required>
-                        <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Deporte">
-                        Deporte
-                    </label>
-                    <label>
-                        <input type="radio" name="categoria" value="arte" required>
-                        <img src="https://images.unsplash.com/photo-1536924940846-227afb31e2a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Arte">
-                        Arte
-                    </label>
-                    <label>
-                        <input type="radio" name="categoria" value="cine" required>
-                        <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Cine">
-                        Cine
-                    </label>
-                    <label>
-                        <input type="radio" name="categoria" value="cafeteria" required>
-                        <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Cafetería">
-                        Cafetería
-                    </label>
-                    <label>
-                        <input type="radio" name="categoria" value="restaurante" required>
-                        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Restaurante">
-                        Restaurante
-                    </label>
-                </div>
-                <select id="nuevoSubcategoria" required>
-                    <option value="">Selecciona subcategoría</option>
-                </select>
-                <select id="nuevoEdad" required>
-                    <option value="">Selecciona grupo de edad</option>
-                    <option value="niños">Niños</option>
-                    <option value="jovenes">Jóvenes</option>
-                    <option value="adultos">Adultos</option>
-                    <option value="tercera_edad">Tercera edad</option>
-                    <option value="todas_las_edades">Todas las edades</option>
-                </select>
-                <input type="number" id="nuevoPersonas" placeholder="Número de personas" min="1" required>
-                <input type="text" id="nuevoLocalizacion" placeholder="Localización" required>
-                <input type="datetime-local" id="nuevoFecha" required>
-                <textarea id="nuevoDescripcion" placeholder="Descripción del evento" rows="4" required></textarea>
-                <button type="submit">Añadir Evento</button>
-            </form>
         </div>
     </div>
 

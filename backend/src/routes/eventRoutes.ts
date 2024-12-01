@@ -5,7 +5,7 @@ import { getEventMessages, createMessage } from '../controllers/messageControlle
 
 const router = express.Router();
 
-router.get('/', getAllEvents as RequestHandler);
+router.get('/', getAllEvents);
 router.get('/:id', getEventById as RequestHandler);
 router.post('/', authenticateToken, createEvent as RequestHandler);
 router.put('/:id', authenticateToken, updateEvent as RequestHandler);

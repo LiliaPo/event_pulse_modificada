@@ -1,37 +1,41 @@
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('loginForm');
 
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    try {
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-        });
+        const email = document.getElementById('emailLogin').value;
+        const password = document.getElementById('passwordLogin').value;
 
-        const data = await response.json();
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
 
-        if (response.ok) {
-            // Guardar el token
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('userId', data.user.id);
-            localStorage.setItem('userRole', data.user.rol);
+            const data = await response.json();
 
-            // Redirigir según el rol
-            if (data.user.rol === 'admin') {
-                window.location.href = '/admin-dashboard';
+            if (response.ok && data.token) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userId', data.user.id);
+                localStorage.setItem('userRole', data.user.rol);
+                localStorage.setItem('userName', data.user.nombre);
+                localStorage.setItem('userEmail', data.user.email);
+
+                if (data.user.rol === 'admin') {
+                    window.location.href = '/admin-dashboard';
+                } else {
+                    window.location.href = '/eventos';
+                }
             } else {
-                window.location.href = '/eventos';
+                alert(data.message || 'Credenciales inválidas');
             }
-        } else {
-            alert(data.message || 'Error al iniciar sesión');
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al iniciar sesión');
         }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al iniciar sesión');
-    }
+    });
 }); 

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { Event } from '../models/Event.js';
+import pool from '../config/database.js';
 
 export const createEvent = async (req: Request, res: Response) => {
     try {
@@ -31,8 +32,9 @@ export const createEvent = async (req: Request, res: Response) => {
 
 export const getAllEvents = async (req: Request, res: Response) => {
     try {
-        const events = await Event.findAll();
-        res.json(events);
+        const result = await pool.query('SELECT * FROM eventos ORDER BY fecha DESC');
+        console.log('Eventos obtenidos:', result.rows); // Para debug
+        res.json(result.rows);
     } catch (error) {
         console.error('Error al obtener eventos:', error);
         res.status(500).json({ message: 'Error al obtener eventos' });

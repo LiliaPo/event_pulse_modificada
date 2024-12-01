@@ -1010,3 +1010,29 @@ select.form-control {
     border: 1px solid #ddd;
     border-radius: 5px;
 }
+
+.evento-detalles {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border-top: 1px solid #eee;
+}
+
+.evento-detalles p {
+    margin: 8px 0;
+    line-height: 1.4;
+}
+
+.evento-detalles strong {
+    color: #2c3e50;
+}
+
+.evento-detalles a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.evento-detalles a:hover {
+    text-decoration: underline;
+}

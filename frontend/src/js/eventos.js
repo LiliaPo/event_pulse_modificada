@@ -1,149 +1,4 @@
-let eventos = [
-    { 
-        id: 1, 
-        nombre: "Concierto de Rock", 
-        categoria: "musica", 
-        subcategoria: "rock", 
-        edad: "jovenes", 
-        personas: 100, 
-        localizacion: "Madrid", 
-        organizador: "Juan", 
-        fecha: "2023-06-15T20:00", 
-        imagen: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-    },
-    { 
-        id: 2, 
-        nombre: "Partido de Fútbol", 
-        categoria: "deporte", 
-        subcategoria: "futbol", 
-        edad: "adultos", 
-        personas: 50, 
-        localizacion: "Barcelona", 
-        organizador: "María", 
-        fecha: "2023-06-20T16:00", 
-        imagen: "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-    },
-    { 
-        id: 3, 
-        nombre: "Exposición de Arte Moderno", 
-        categoria: "arte", 
-        subcategoria: "pintura", 
-        edad: "adultos", 
-        personas: 30, 
-        localizacion: "Valencia", 
-        organizador: "Carlos", 
-        fecha: "2023-06-25T10:00", 
-        imagen: "https://images.unsplash.com/photo-1531913764164-f85c52e6e654?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-    },
-    { 
-        id: 4, 
-        nombre: "Taller de Pintura para Niños", 
-        categoria: "arte", 
-        subcategoria: "pintura", 
-        edad: "niños", 
-        personas: 15, 
-        localizacion: "Sevilla", 
-        organizador: "Ana", 
-        fecha: "2023-07-01T11:00", 
-        imagen: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-    },
-    { 
-        id: 5, 
-        nombre: "Festival de Jazz", 
-        categoria: "musica", 
-        subcategoria: "jazz", 
-        edad: "adultos", 
-        personas: 200, 
-        localizacion: "Madrid", 
-        organizador: "Pedro", 
-        fecha: "2023-07-10T19:00", 
-        imagen: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-    },
-    { 
-        id: 6, 
-        nombre: "Maratón Urbano", 
-        categoria: "deporte", 
-        subcategoria: "atletismo", 
-        edad: "adultos", 
-        personas: 1000, 
-        localizacion: "Barcelona", 
-        organizador: "Laura", 
-        fecha: "2023-07-15T08:00", 
-        imagen: "https://images.unsplash.com/photo-1513593771513-7b58b6c4af38?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-    },
-    { 
-        id: 7, 
-        nombre: "Cine al Aire Libre", 
-        categoria: "cine", 
-        subcategoria: "clásicos", 
-        edad: "todas_las_edades", 
-        personas: 150, 
-        localizacion: "Valencia", 
-        organizador: "Miguel", 
-        fecha: "2023-07-20T21:00", 
-        imagen: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-    },
-    { 
-        id: 8, 
-        nombre: "Noche de Comedia", 
-        categoria: "arte", 
-        subcategoria: "stand-up", 
-        edad: "adultos", 
-        personas: 80, 
-        localizacion: "Madrid", 
-        organizador: "Sara", 
-        fecha: "2023-07-25T22:00", 
-        imagen: "https://images.unsplash.com/photo-1585647347483-22b66260dfff?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-    },
-    { 
-        id: 9, 
-        nombre: "Degustación de Café", 
-        categoria: "cafeteria", 
-        subcategoria: "cata", 
-        edad: "adultos", 
-        personas: 25, 
-        localizacion: "Sevilla", 
-        organizador: "Javier", 
-        fecha: "2023-08-01T16:00", 
-        imagen: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-    },
-    { 
-        id: 10, 
-        nombre: "Festival Gastronómico", 
-        categoria: "restaurante", 
-        subcategoria: "internacional", 
-        edad: "todas_las_edades", 
-        personas: 500, 
-        localizacion: "Barcelona", 
-        organizador: "Elena", 
-        fecha: "2023-08-05T12:00", 
-        imagen: "https://images.unsplash.com/photo-1555244162-803834f70033?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-    },
-    { 
-        id: 11, 
-        nombre: "Concierto de Pop", 
-        categoria: "musica", 
-        subcategoria: "pop", 
-        edad: "jovenes", 
-        personas: 150, 
-        localizacion: "Málaga", 
-        organizador: "Laura", 
-        fecha: "2023-08-10T20:00", 
-        imagen: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-    },
-    { 
-        id: 12, 
-        nombre: "Torneo de Baloncesto", 
-        categoria: "deporte", 
-        subcategoria: "baloncesto", 
-        edad: "jovenes", 
-        personas: 80, 
-        localizacion: "Zaragoza", 
-        organizador: "Carlos", 
-        fecha: "2023-08-15T10:00", 
-        imagen: "https://images.unsplash.com/photo-1546519638-68e109498ffc?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-    }
-];
+let eventos = [];  // Ahora empezará vacío
 
 let usuarioActual = {
     // ... objeto de usuario ...
@@ -162,19 +17,81 @@ function initMap() {
     }).addTo(map);
 }
 
+// Función para cargar eventos desde la API
+async function cargarEventos() {
+    try {
+        const response = await fetch('/api/events', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Error al cargar eventos');
+        }
+
+        eventos = await response.json();
+        mostrarEventos(eventos);
+        mostrarEventosEnMapa(eventos);
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al cargar los eventos');
+    }
+}
+
+// Añade este objeto con las imágenes por defecto para cada categoría
+const imagenesPorCategoria = {
+    musica: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    deporte: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    arte: 'https://images.unsplash.com/photo-1536924940846-227afb31e2a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    cine: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    cafeteria: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    restaurante: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'
+};
+
 function mostrarEventos(eventos) {
     const eventosContainer = document.getElementById('eventos');
     eventosContainer.innerHTML = eventos.map(evento => `
         <div class="evento">
-            <div class="evento-banner" style="background-image: url('${evento.imagen || 'https://via.placeholder.com/300x150'}')"></div>
+            <div class="evento-banner" style="background-image: url('${evento.imagen || imagenesPorCategoria[evento.categoria] || 'https://via.placeholder.com/300x150'}')"></div>
             <span class="evento-categoria categoria-${evento.categoria}">${evento.categoria}</span>
             <h3>${evento.nombre}</h3>
             <p><i class="fas fa-calendar"></i> ${new Date(evento.fecha).toLocaleDateString()}</p>
             <p><i class="fas fa-map-marker-alt"></i> ${evento.localizacion}</p>
             <p><i class="fas fa-euro-sign"></i> ${evento.precio || 'Gratis'}</p>
             <button class="btn-ver-mas" onclick="verDetallesEvento('${evento.id}')">Ver más</button>
+            
+            <div class="evento-detalles" id="detalles-${evento.id}" style="display: none;">
+                <p><strong>Descripción:</strong> ${evento.descripcion || 'No hay descripción disponible'}</p>
+                <p><strong>Dirección:</strong> ${evento.direccion || 'No especificada'}</p>
+                <p><strong>Organizador:</strong> ${evento.organizador}</p>
+                ${evento.url ? `<p><strong>URL del evento:</strong> <a href="${evento.url}" target="_blank">${evento.url}</a></p>` : ''}
+                <p><strong>Fecha y hora:</strong> ${new Date(evento.fecha).toLocaleString()}</p>
+            </div>
         </div>
     `).join('');
+
+    // Añadir event listeners para los botones "Ver más"
+    document.querySelectorAll('.btn-ver-mas').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const eventoId = btn.getAttribute('onclick').match(/'([^']+)'/)[1];
+            verDetallesEvento(eventoId);
+        });
+    });
+}
+
+function verDetallesEvento(eventoId) {
+    const detallesDiv = document.getElementById(`detalles-${eventoId}`);
+    const boton = document.querySelector(`[onclick="verDetallesEvento('${eventoId}')"]`);
+    
+    if (detallesDiv.style.display === 'none') {
+        detallesDiv.style.display = 'block';
+        boton.textContent = 'Ver menos';
+    } else {
+        detallesDiv.style.display = 'none';
+        boton.textContent = 'Ver más';
+    }
 }
 
 function usarUbicacionActual() {
@@ -265,29 +182,11 @@ function cerrarPerfil() {
     }
 }
 
-// Función para abrir el modal de nuevo evento
-function abrirModalEvento() {
-    console.log('Intentando abrir modal de nuevo evento'); // Debug
-    const modal = document.getElementById('formularioEvento');
-    console.log('Modal encontrado:', modal); // Debug
-    
-    if (modal) {
-        modal.style.display = 'flex';
-        modal.style.zIndex = '10000'; // Asegurarnos que está por encima
-        console.log('Modal abierto, display:', modal.style.display); // Debug
-    }
-}
-
-// Función para cerrar el modal de nuevo evento
-function cerrarModalEvento() {
-    const modal = document.getElementById('formularioEvento');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Cargado'); // Debug
+    console.log('DOM Cargado');
+    
+    initMap();
+    cargarEventos();
     
     const btnPerfil = document.getElementById('mostrarPerfil');
     console.log('Botón perfil encontrado:', btnPerfil); // Debug
@@ -324,45 +223,29 @@ document.addEventListener('DOMContentLoaded', function() {
     mostrarEventos(eventos);
     mostrarEventosEnMapa(eventos);
     actualizarSubcategorias();
-
-    // Event listeners para el modal de nuevo evento
-    const btnAbrirFormulario = document.getElementById('abrirFormulario');
-    if (btnAbrirFormulario) {
-        btnAbrirFormulario.removeEventListener('click', abrirModalEvento); // Remover listeners previos
-        btnAbrirFormulario.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation(); // Evitar propagación
-            console.log('Click en botón nuevo evento'); // Debug
-            abrirModalEvento();
-        });
-    }
-
-    // Event listener para cerrar el modal
-    const btnCerrarFormulario = document.querySelector('#formularioEvento .cerrar');
-    if (btnCerrarFormulario) {
-        btnCerrarFormulario.removeEventListener('click', cerrarModalEvento); // Remover listeners previos
-        btnCerrarFormulario.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation(); // Evitar propagación
-            cerrarModalEvento();
-        });
-    }
 });
 
 function mostrarEventosEnMapa(eventos) {
+    if (!map) return;
+
+    // Limpiar marcadores existentes
     map.eachLayer(layer => {
         if (layer instanceof L.Marker) {
             map.removeLayer(layer);
         }
     });
 
+    // Añadir nuevos marcadores
     eventos.forEach(evento => {
-        // Coordenadas aleatorias en España
-        const lat = 36 + Math.random() * 8; // Entre 36 y 44 grados de latitud
-        const lng = -9 + Math.random() * 12; // Entre -9 y 3 grados de longitud
-        L.marker([lat, lng])
-            .addTo(map)
-            .bindPopup(`<b>${evento.nombre}</b><br>${evento.fecha}`);
+        if (evento.lat && evento.lng) {
+            L.marker([evento.lat, evento.lng])
+                .addTo(map)
+                .bindPopup(`
+                    <b>${evento.nombre}</b><br>
+                    ${evento.localizacion}<br>
+                    ${new Date(evento.fecha).toLocaleDateString()}
+                `);
+        }
     });
 }
 
@@ -380,10 +263,6 @@ function obtenerIconoCategoria(categoria) {
 
 function filtrarEventos() {
     const categoria = document.getElementById('categoria').value;
-    const subcategoria = document.getElementById('subcategoria').value;
-    const edad = document.getElementById('edad').value;
-    const personasMin = parseInt(document.getElementById('personasMin').value) || 0;
-    const personasMax = parseInt(document.getElementById('personasMax').value) || Infinity;
     const localizacion = document.getElementById('localizacion').value.toLowerCase();
     const fechaInicio = document.getElementById('fechaEventoInicio').value;
     const fechaFin = document.getElementById('fechaEventoFin').value;
@@ -391,9 +270,6 @@ function filtrarEventos() {
     const eventosFiltrados = eventos.filter(evento => {
         const fechaEvento = new Date(evento.fecha);
         return (!categoria || evento.categoria === categoria) &&
-               (!subcategoria || evento.subcategoria === subcategoria) &&
-               (!edad || evento.edad === edad) &&
-               (evento.personas >= personasMin && evento.personas <= personasMax) &&
                (!localizacion || evento.localizacion.toLowerCase().includes(localizacion)) &&
                (!fechaInicio || fechaEvento >= new Date(fechaInicio)) &&
                (!fechaFin || fechaEvento <= new Date(fechaFin));
@@ -402,3 +278,6 @@ function filtrarEventos() {
     mostrarEventos(eventosFiltrados);
     mostrarEventosEnMapa(eventosFiltrados);
 }
+
+// Añadir evento change al select de categorías
+document.getElementById('categoria').addEventListener('change', filtrarEventos);

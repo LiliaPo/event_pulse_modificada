@@ -17,6 +17,7 @@ export const login = async (req: Request, res: Response) => {
         );
 
         if (result.rows.length === 0) {
+            console.log('Usuario no encontrado');
             return res.status(401).json({ message: 'Credenciales inválidas' });
         }
 
@@ -24,6 +25,7 @@ export const login = async (req: Request, res: Response) => {
         const validPassword = await bcrypt.compare(password, user.password);
 
         if (!validPassword) {
+            console.log('Contraseña incorrecta');
             return res.status(401).json({ message: 'Credenciales inválidas' });
         }
 
@@ -33,6 +35,8 @@ export const login = async (req: Request, res: Response) => {
             { expiresIn: '24h' }
         );
 
+        console.log('Login exitoso para:', email);
+        
         res.json({
             token,
             user: {
