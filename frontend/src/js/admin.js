@@ -17,25 +17,19 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
+            console.log('Respuesta login:', data);
 
             if (data.token) {
                 localStorage.setItem('token', data.token);
-                localStorage.setItem('userId', data.user.id);
-                localStorage.setItem('userRole', data.user.rol);
-                localStorage.setItem('userName', data.user.nombre);
-                localStorage.setItem('userEmail', data.user.email);
-                
-                window.location.href = '/pages/admin-dashboard.html';
+                localStorage.setItem('userRole', 'admin');
+                window.location.href = '/admin-dashboard';
             } else {
-                const errorMessage = document.getElementById('errorMessage');
-                errorMessage.textContent = 'Credenciales inválidas';
-                errorMessage.style.display = 'block';
+                console.error('No se recibió token');
+                document.getElementById('errorMessage').textContent = 'Credenciales inválidas';
+                document.getElementById('errorMessage').style.display = 'block';
             }
         } catch (error) {
             console.error('Error:', error);
-            const errorMessage = document.getElementById('errorMessage');
-            errorMessage.textContent = 'Error al intentar iniciar sesión';
-            errorMessage.style.display = 'block';
         }
     });
 }); 

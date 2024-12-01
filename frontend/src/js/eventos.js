@@ -11,10 +11,27 @@ const subcategorias = {
 let map, userMarker;
 
 function initMap() {
-    map = L.map('mapa').setView([40.416775, -3.703790], 13);
+    // Centrar en España
+    map = L.map('mapa').setView([40.416775, -3.703790], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
+
+    // Añadir control de escala
+    L.control.scale().addTo(map);
+
+    // Limitar el área visible a España
+    const bounds = L.latLngBounds(
+        L.latLng(35.8, -9.4),  // Esquina suroeste
+        L.latLng(43.8, 4.4)    // Esquina noreste
+    );
+    map.setMaxBounds(bounds);
+    map.setMinZoom(5);  // Zoom mínimo para ver España
+    map.setMaxZoom(18); // Zoom máximo para detalles
+
+    map.on('drag', function() {
+        map.panInsideBounds(bounds, { animate: false });
+    });
 }
 
 // Función para cargar eventos desde la API
@@ -65,6 +82,7 @@ function mostrarEventos(eventos) {
                 <p><strong>Descripción:</strong> ${evento.descripcion || 'No hay descripción disponible'}</p>
                 <p><strong>Dirección:</strong> ${evento.direccion || 'No especificada'}</p>
                 <p><strong>Organizador:</strong> ${evento.organizador}</p>
+                ${evento.telefono_contacto ? `<p><strong>Contacto:</strong> <a href="tel:${evento.telefono_contacto}">${evento.telefono_contacto}</a></p>` : ''}
                 ${evento.url ? `<p><strong>URL del evento:</strong> <a href="${evento.url}" target="_blank">${evento.url}</a></p>` : ''}
                 <p><strong>Fecha y hora:</strong> ${new Date(evento.fecha).toLocaleString()}</p>
             </div>
@@ -235,18 +253,81 @@ function mostrarEventosEnMapa(eventos) {
         }
     });
 
-    // Añadir nuevos marcadores
-    eventos.forEach(evento => {
-        if (evento.lat && evento.lng) {
-            L.marker([evento.lat, evento.lng])
-                .addTo(map)
-                .bindPopup(`
-                    <b>${evento.nombre}</b><br>
-                    ${evento.localizacion}<br>
-                    ${new Date(evento.fecha).toLocaleDateString()}
-                `);
+    // Crear un grupo para los marcadores
+    const markers = [];
+    const procesarEventos = async () => {
+        for (const evento of eventos) {
+            let coords;
+            if (evento.lat && evento.lng) {
+                coords = { lat: evento.lat, lng: evento.lng };
+            } else {
+                coords = await geocodificarDireccion(evento.localizacion);
+            }
+
+            if (coords) {
+                // Crear icono personalizado según la categoría
+                const icon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div class="marker-pin ${evento.categoria}">
+                            <i class="${obtenerIconoCategoria(evento.categoria)}"></i>
+                          </div>`,
+                    iconSize: [30, 42],
+                    iconAnchor: [15, 42]
+                });
+
+                const marker = L.marker([coords.lat, coords.lng], { icon })
+                    .bindPopup(`
+                        <div class="evento-popup">
+                            <h3>${evento.nombre}</h3>
+                            <p><i class="fas fa-calendar"></i> ${new Date(evento.fecha).toLocaleDateString()}</p>
+                            <p><i class="fas fa-map-marker-alt"></i> ${evento.localizacion}</p>
+                            <p><i class="fas fa-tag"></i> ${evento.categoria}</p>
+                            ${evento.telefono_contacto ? `<p><i class="fas fa-phone"></i> <a href="tel:${evento.telefono_contacto}">${evento.telefono_contacto}</a></p>` : ''}
+                            <button onclick="centrarEnEvento(${coords.lat}, ${coords.lng})" class="btn-ver-ubicacion">
+                                Ver ubicación
+                            </button>
+                        </div>
+                    `);
+                markers.push(marker);
+                marker.addTo(map);
+            }
         }
+    };
+
+    procesarEventos();
+}
+
+// Función para centrar el mapa en un evento específico
+function centrarEnEvento(lat, lng) {
+    map.setView([lat, lng], 15, {
+        animate: true,
+        duration: 1
     });
+}
+
+// Función para geocodificar direcciones
+async function geocodificarDireccion(direccion) {
+    try {
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?` + 
+            `format=json&q=${encodeURIComponent(direccion)},España` +
+            `&countrycodes=es&limit=1&addressdetails=1`
+        );
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+            console.log('Localización encontrada:', data[0]);
+            return {
+                lat: parseFloat(data[0].lat),
+                lng: parseFloat(data[0].lon)
+            };
+        }
+        console.log('No se encontró la localización para:', direccion);
+        return null;
+    } catch (error) {
+        console.error('Error al geocodificar:', error);
+        return null;
+    }
 }
 
 function obtenerIconoCategoria(categoria) {

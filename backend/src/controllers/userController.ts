@@ -1,11 +1,15 @@
 import { Request, Response } from 'express';
 import pool from '../config/database.js';
-import { TypedRequest, TypedResponse } from '../types/types.js';
 
 export const getAllUsers = async (req: Request, res: Response) => {
     try {
-        console.log('Obteniendo usuarios...');
-        const result = await pool.query('SELECT * FROM usuarios ORDER BY created_at DESC');
+        const result = await pool.query(`
+            SELECT id, email, nombre, username, rol, telefono, whatsapp, instagram, created_at 
+            FROM usuarios 
+            WHERE rol != 'admin' 
+            ORDER BY created_at DESC
+        `);
+        
         console.log('Usuarios encontrados:', result.rows);
         res.json(result.rows);
     } catch (error) {
@@ -14,11 +18,11 @@ export const getAllUsers = async (req: Request, res: Response) => {
     }
 };
 
-export const getUserProfile = async (req: TypedRequest, res: TypedResponse) => {
+export const getUserProfile = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id;
         const result = await pool.query(
-            'SELECT id, email, nombre, username, telefono, whatsapp, instagram FROM usuarios WHERE id = $1',
+            'SELECT id, email, nombre, imagen_perfil FROM usuarios WHERE id = $1',
             [userId]
         );
 
@@ -33,28 +37,52 @@ export const getUserProfile = async (req: TypedRequest, res: TypedResponse) => {
     }
 };
 
-export const updateProfile = async (req: TypedRequest, res: TypedResponse ) => {
+export const updateProfile = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id;
-        const { nombre, email, telefono, whatsapp, instagram } = req.body;
+        const { nombre, email, imagen } = req.body;
 
-        const result = await pool.query(
-            `UPDATE usuarios 
-             SET nombre = $1, email = $2, telefono = $3, 
-                 whatsapp = $4, instagram = $5
-             WHERE id = $6 
-             RETURNING id, email, nombre, username, telefono, whatsapp, instagram`,
-            [nombre, email, telefono, whatsapp, instagram, userId]
+        if (!userId) {
+            return res.status(401).json({ message: 'Usuario no autenticado' });
+        }
+
+        console.log('Datos recibidos:', { userId, nombre, email });
+
+        // Primero verificar si el usuario existe
+        const userExists = await pool.query(
+            'SELECT id FROM usuarios WHERE id = $1',
+            [userId]
         );
 
-        if (result.rows.length === 0) {
+        if (userExists.rows.length === 0) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        res.json(result.rows[0]);
+        // Realizar la actualización
+        const query = `
+            UPDATE usuarios 
+            SET nombre = $1, 
+                email = $2, 
+                imagen_perfil = $3,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $4 
+            RETURNING id, email, nombre, imagen_perfil
+        `;
+
+        const result = await pool.query(query, [nombre, email, imagen, userId]);
+
+        if (result.rows.length === 0) {
+            return res.status(500).json({ message: 'Error al actualizar el perfil' });
+        }
+
+        console.log('Perfil actualizado:', result.rows[0]);
+        return res.json(result.rows[0]);
     } catch (error) {
         console.error('Error al actualizar perfil:', error);
-        res.status(500).json({ message: 'Error al actualizar perfil' });
+        return res.status(500).json({ 
+            message: 'Error al actualizar perfil',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
     }
 };
 

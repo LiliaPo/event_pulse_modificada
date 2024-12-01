@@ -12,143 +12,93 @@
     <div class="container">
         <h1>Panel de Administración</h1>
         
-        <!-- Pestañas -->
-        <div class="tabs">
-            <button class="tab-button active" onclick="showTab('usuarios')">Gestión de Usuarios</button>
-            <button class="tab-button" onclick="showTab('eventos')">Gestión de Eventos</button>
+        <!-- Pestañas de navegación -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" data-tab="usuarios">Gestión de Usuarios</button>
+            <button class="tab-btn" data-tab="eventos">Gestión de Eventos</button>
         </div>
-        
-        <!-- Contenido de Usuarios -->
+
+        <!-- Sección de Usuarios -->
         <div id="usuarios" class="tab-content active">
+            <div class="search-box">
+                <input type="text" id="searchUser" placeholder="Buscar usuarios...">
+            </div>
+
             <div id="usuariosContainer">
                 <!-- Aquí se cargarán los usuarios -->
             </div>
         </div>
-        
-        <!-- Contenido de Eventos -->
+
+        <!-- Sección de Eventos -->
         <div id="eventos" class="tab-content">
-            <div class="container">
-                <div class="row">
-                    <div class="col-12">
-                        <h2>Lista de Eventos</h2>
-                        <div class="section-header">
-                            <button onclick="openCreateEventoModal()" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Crear Evento
-                            </button>
-                        </div>
-                        <div id="eventosContainer" class="eventos-grid">
-                            <!-- Aquí se mostrarán los eventos -->
-                        </div>
-                    </div>
-                </div>
+            <div class="section-header">
+                <button class="btn-primary" onclick="showCreateEventModal()">
+                    <i class="fas fa-plus"></i> Crear Evento
+                </button>
+            </div>
+            <div id="eventosContainer">
+                <!-- Aquí se cargarán los eventos -->
             </div>
         </div>
-    </div>
 
-    <!-- Modales -->
-    <!-- Modal para editar usuario -->
-    <div id="editModal" class="modal">
-        <div class="modal-contenido">
-            <span class="close" onclick="closeEditModal()">&times;</span>
-            <h2>Editar Usuario</h2>
-            <form id="editUserForm">
-                <input type="hidden" id="editUserId">
-                <div class="form-group">
-                    <label for="editNombre">Nombre:</label>
-                    <input type="text" id="editNombre" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label for="editEmail">Email:</label>
-                    <input type="email" id="editEmail" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label for="editUsername">Username:</label>
-                    <input type="text" id="editUsername" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label for="editTelefono">Teléfono:</label>
-                    <input type="tel" id="editTelefono" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="editWhatsapp">WhatsApp:</label>
-                    <input type="tel" id="editWhatsapp" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="editInstagram">Instagram:</label>
-                    <input type="text" id="editInstagram" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="editRol">Rol:</label>
-                    <select id="editRol" class="form-control" required>
-                        <option value="usuario">Usuario</option>
-                        <option value="admin">Administrador</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-            </form>
+        <!-- Modal para editar usuario -->
+        <div id="editModal" class="modal">
+            <!-- El contenido del modal se genera dinámicamente -->
         </div>
-    </div>
 
-    <!-- Modal para crear/editar evento -->
-    <div id="editEventoModal" class="modal">
-        <!-- ... (contenido del modal de edición de evento) ... -->
-    </div>
-
-    <!-- Modal para crear evento -->
-    <div id="createEventoModal" class="modal">
-        <div class="modal-contenido">
-            <span class="close" onclick="closeCreateEventoModal()">&times;</span>
-            <h2>Crear Nuevo Evento</h2>
-            <form id="createEventoForm">
-                <div class="form-group">
-                    <label for="createEventoNombre">Nombre:</label>
-                    <input type="text" id="createEventoNombre" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label for="createEventoCategoria">Categoría:</label>
-                    <select id="createEventoCategoria" class="form-control" required>
-                        <option value="">Selecciona categoría</option>
-                        <option value="musica">Música</option>
-                        <option value="deporte">Deporte</option>
-                        <option value="arte">Arte</option>
-                        <option value="cine">Cine</option>
-                        <option value="cafeteria">Cafetería</option>
-                        <option value="restaurante">Restaurante</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="createEventoFecha">Fecha:</label>
-                    <input type="datetime-local" id="createEventoFecha" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label for="createEventoLocalizacion">Localización:</label>
-                    <input type="text" id="createEventoLocalizacion" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label for="createEventoDireccion">Dirección:</label>
-                    <input type="text" id="createEventoDireccion" class="form-control" placeholder="Calle, número, código postal...">
-                </div>
-                <div class="form-group">
-                    <label for="createEventoOrganizador">Organizador:</label>
-                    <input type="text" id="createEventoOrganizador" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label for="createEventoPrecio">Precio (€):</label>
-                    <div class="input-group">
-                        <input type="number" id="createEventoPrecio" class="form-control" step="0.01" required>
-                        <span class="input-suffix">€</span>
+        <!-- Modal para crear/editar evento -->
+        <div id="eventoModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Crear Nuevo Evento</h2>
+                <form id="eventoForm">
+                    <div class="form-group">
+                        <label for="nombreEvento">Nombre:</label>
+                        <input type="text" id="nombreEvento" required>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="createEventoUrl">URL del Evento:</label>
-                    <input type="url" id="createEventoUrl" class="form-control" placeholder="https://...">
-                </div>
-                <div class="form-group">
-                    <label for="createEventoImagen">Imagen del Evento:</label>
-                    <input type="file" id="createEventoImagen" class="form-control" accept="image/*">
-                </div>
-                <button type="submit" class="btn btn-primary">Crear Evento</button>
-            </form>
+                    <div class="form-group">
+                        <label for="categoriaEvento">Categoría:</label>
+                        <select id="categoriaEvento" required>
+                            <option value="">Selecciona una categoría</option>
+                            <option value="musica">Música</option>
+                            <option value="deporte">Deporte</option>
+                            <option value="arte">Arte</option>
+                            <option value="cine">Cine</option>
+                            <option value="cafeteria">Cafetería</option>
+                            <option value="restaurante">Restaurante</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fechaEvento">Fecha y hora:</label>
+                        <input type="datetime-local" id="fechaEvento" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="localizacionEvento">Ciudad:</label>
+                        <input type="text" id="localizacionEvento" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="direccionEvento">Dirección completa:</label>
+                        <input type="text" id="direccionEvento" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcionEvento">Descripción:</label>
+                        <textarea id="descripcionEvento" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="telefonoEvento">Teléfono de contacto:</label>
+                        <input type="tel" id="telefonoEvento" pattern="[0-9]{9}">
+                    </div>
+                    <div class="form-group">
+                        <label for="organizadorEvento">Organizador:</label>
+                        <input type="text" id="organizadorEvento" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="precioEvento">Precio (€):</label>
+                        <input type="number" id="precioEvento" min="0" step="0.01" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Guardar Evento</button>
+                </form>
+            </div>
         </div>
     </div>
 

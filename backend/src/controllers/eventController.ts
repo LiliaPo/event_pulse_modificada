@@ -16,14 +16,38 @@ export const createEvent = async (req: Request, res: Response) => {
             subcategoria: req.body.subcategoria,
             direccion: req.body.direccion,
             descripcion: req.body.descripcion,
+            telefono_contacto: req.body.telefono_contacto,
             lat: undefined,
             lng: undefined
         };
 
-        console.log('Datos recibidos:', eventData); // Para debug
+        console.log('Datos recibidos:', eventData);
 
-        const newEvent = await Event.create(eventData);
-        res.status(201).json(newEvent);
+        const result = await pool.query(
+            `INSERT INTO eventos (
+                id, nombre, categoria, fecha, localizacion, 
+                organizador, precio, url, imagen, subcategoria, 
+                direccion, descripcion, telefono_contacto
+            ) VALUES (
+                gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+            ) RETURNING *`,
+            [
+                eventData.nombre,
+                eventData.categoria,
+                eventData.fecha,
+                eventData.localizacion,
+                eventData.organizador,
+                eventData.precio,
+                eventData.url,
+                eventData.imagen,
+                eventData.subcategoria,
+                eventData.direccion,
+                eventData.descripcion,
+                eventData.telefono_contacto
+            ]
+        );
+
+        res.status(201).json(result.rows[0]);
     } catch (error: any) {
         console.error('Error detallado:', error);
         res.status(500).json({ message: 'Error al crear el evento', error: error.message });

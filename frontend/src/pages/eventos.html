@@ -14,7 +14,7 @@
     <div class="container" id="contenido">
         <nav>
             <button class="btn-perfil">
-                <img src="https://via.placeholder.com/35" alt="Foto de perfil" class="foto-perfil-nav">
+                <span class="foto-perfil-nav">👤</span>
                 Mi Perfil
             </button>
         </nav>
@@ -52,7 +52,20 @@
             <span class="cerrar">&times;</span>
             <h2>Mi Perfil</h2>
             <div class="perfil-container">
-                <img id="imagenPerfilPreview" src="https://via.placeholder.com/150" alt="Foto de perfil" class="foto-perfil-preview">
+                <div class="avatar-selection">
+                    <h3>Selecciona tu avatar</h3>
+                    <div class="avatar-grid">
+                        <div class="avatar-option" data-avatar="👤">👤</div>
+                        <div class="avatar-option" data-avatar="👨">👨</div>
+                        <div class="avatar-option" data-avatar="👩">👩</div>
+                        <div class="avatar-option" data-avatar="🧑">🧑</div>
+                        <div class="avatar-option" data-avatar="👨‍💼">👨‍💼</div>
+                        <div class="avatar-option" data-avatar="👩‍💼">👩‍💼</div>
+                        <div class="avatar-option" data-avatar="🧑‍💼">🧑‍💼</div>
+                        <div class="avatar-option" data-avatar="👨‍🎓">👨‍🎓</div>
+                        <div class="avatar-option" data-avatar="👩‍🎓">👩‍🎓</div>
+                    </div>
+                </div>
                 <form id="perfilForm">
                     <div class="form-group">
                         <label for="nombreUsuario">Nombre:</label>
@@ -61,29 +74,6 @@
                     <div class="form-group">
                         <label for="emailUsuario">Email:</label>
                         <input type="email" id="emailUsuario" placeholder="Email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="telefonoUsuario">Teléfono:</label>
-                        <input type="tel" id="telefonoUsuario" placeholder="Teléfono">
-                    </div>
-                    <div class="form-group">
-                        <label for="whatsappUsuario">WhatsApp:</label>
-                        <input type="text" id="whatsappUsuario" placeholder="WhatsApp">
-                    </div>
-                    <div class="form-group">
-                        <label for="instagramUsuario">Instagram:</label>
-                        <input type="text" id="instagramUsuario" placeholder="Instagram">
-                    </div>
-                    <div class="form-group">
-                        <label for="imagenPerfil">Imagen de perfil:</label>
-                        <input type="file" id="imagenPerfil" accept="image/*">
-                    </div>
-                    <div class="formas-contacto">
-                        <h3>Formas de contacto preferidas:</h3>
-                        <label><input type="checkbox" name="contacto" value="email"> Email</label>
-                        <label><input type="checkbox" name="contacto" value="telefono"> Teléfono</label>
-                        <label><input type="checkbox" name="contacto" value="whatsapp"> WhatsApp</label>
-                        <label><input type="checkbox" name="contacto" value="instagram"> Instagram</label>
                     </div>
                     <button type="submit" class="btn-guardar">Guardar Perfil</button>
                 </form>

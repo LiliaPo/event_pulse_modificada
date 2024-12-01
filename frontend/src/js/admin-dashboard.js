@@ -1,43 +1,127 @@
 document.addEventListener('DOMContentLoaded', () => {
-    if (!localStorage.getItem('token')) {
+    // Verificar si el usuario es admin
+    if (!localStorage.getItem('token') || localStorage.getItem('userRole') !== 'admin') {
         window.location.href = '/admin';
         return;
     }
 
+    // Cargar datos iniciales
     loadUsers();
     loadEventos();
 
-    document.getElementById('searchUser').addEventListener('input', (e) => {
+    // Manejar cambio de pestañas
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remover clase active de todos los botones y contenidos
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Añadir clase active al botón clickeado y su contenido
+            button.classList.add('active');
+            const tabId = button.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+
+    // Búsqueda de usuarios
+    document.getElementById('searchUser')?.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
         const filteredUsers = users.filter(user => 
-            user.nombre.toLowerCase().includes(searchTerm) ||
-            user.email.toLowerCase().includes(searchTerm)
+            user.nombre?.toLowerCase().includes(searchTerm) ||
+            user.email?.toLowerCase().includes(searchTerm)
         );
         displayUsers(filteredUsers);
     });
+
+    // Inicializar formulario de eventos
+    document.getElementById('eventoForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const eventoData = {
+            nombre: document.getElementById('nombreEvento').value,
+            categoria: document.getElementById('categoriaEvento').value,
+            fecha: document.getElementById('fechaEvento').value,
+            localizacion: document.getElementById('localizacionEvento').value,
+            direccion: document.getElementById('direccionEvento').value,
+            descripcion: document.getElementById('descripcionEvento').value,
+            telefono_contacto: document.getElementById('telefonoEvento').value,
+            organizador: document.getElementById('organizadorEvento').value,
+            precio: parseFloat(document.getElementById('precioEvento').value)
+        };
+
+        try {
+            const response = await fetch('/api/events', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(eventoData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al crear el evento');
+            }
+
+            closeEventModal();
+            loadEventos();
+            alert('Evento creado correctamente');
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al crear el evento');
+        }
+    });
+
+    // Cerrar modal de eventos
+    document.querySelector('#eventoModal .close')?.addEventListener('click', closeEventModal);
 });
 
 let users = [];
 
+// Funciones para modales
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.classList.add('modal-open');
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+    }
+}
+
+// Funciones para eventos
+window.showCreateEventModal = function() {
+    openModal('eventoModal');
+    document.getElementById('eventoForm').reset();
+}
+
+window.closeEventModal = function() {
+    closeModal('eventoModal');
+}
+
+// Funciones para usuarios
 async function loadUsers() {
     try {
-        console.log('Cargando usuarios...');
-        const token = localStorage.getItem('token');
-        console.log('Token:', token);
-        
         const response = await fetch('/api/users', {
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
-        console.log('Respuesta status:', response.status);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
-        const users = await response.json();
-        console.log('Usuarios recibidos:', users);
+
+        users = await response.json();
         displayUsers(users);
     } catch (error) {
         console.error('Error al cargar usuarios:', error);
@@ -46,6 +130,8 @@ async function loadUsers() {
 
 function displayUsers(users) {
     const container = document.getElementById('usuariosContainer');
+    if (!container) return;
+
     container.innerHTML = `
         <table class="data-table">
             <thead>
@@ -53,23 +139,17 @@ function displayUsers(users) {
                     <th>Nombre</th>
                     <th>Email</th>
                     <th>Username</th>
-                    <th>Teléfono</th>
-                    <th>WhatsApp</th>
-                    <th>Instagram</th>
                     <th>Rol</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 ${users.map(user => `
-                    <tr data-user-id="${user.id}">
-                        <td>${user.nombre}</td>
-                        <td>${user.email}</td>
-                        <td>${user.username}</td>
-                        <td>${user.telefono || '-'}</td>
-                        <td>${user.whatsapp || '-'}</td>
-                        <td>${user.instagram || '-'}</td>
-                        <td>${user.rol}</td>
+                    <tr>
+                        <td>${user.nombre || ''}</td>
+                        <td>${user.email || ''}</td>
+                        <td>${user.username || ''}</td>
+                        <td>${user.rol || 'usuario'}</td>
                         <td class="actions">
                             <button onclick="editUser('${user.id}')" class="btn-primary">
                                 <i class="fas fa-edit"></i>
@@ -85,101 +165,7 @@ function displayUsers(users) {
     `;
 }
 
-function closeEditModal() {
-    document.getElementById('editModal').style.display = 'none';
-    document.getElementById('editUserForm').reset();
-}
-
-async function editUser(userId) {
-    try {
-        const response = await fetch(`/api/users/${userId}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        const user = await response.json();
-
-        // Rellenar el formulario con los datos del usuario
-        document.getElementById('editUserId').value = user.id;
-        document.getElementById('editNombre').value = user.nombre;
-        document.getElementById('editEmail').value = user.email;
-        document.getElementById('editUsername').value = user.username;
-        document.getElementById('editTelefono').value = user.telefono || '';
-        document.getElementById('editWhatsapp').value = user.whatsapp || '';
-        document.getElementById('editInstagram').value = user.instagram || '';
-        document.getElementById('editRol').value = user.rol;
-
-        // Mostrar el modal
-        document.getElementById('editModal').style.display = 'block';
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al cargar el usuario');
-    }
-}
-
-document.getElementById('editUserForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const userId = document.getElementById('editUserId').value;
-    const userData = {
-        nombre: document.getElementById('editNombre').value,
-        email: document.getElementById('editEmail').value,
-        username: document.getElementById('editUsername').value,
-        telefono: document.getElementById('editTelefono').value,
-        whatsapp: document.getElementById('editWhatsapp').value,
-        instagram: document.getElementById('editInstagram').value,
-        rol: document.getElementById('editRol').value
-    };
-
-    try {
-        const response = await fetch(`/api/users/${userId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify(userData)
-        });
-
-        if (response.ok) {
-            closeEditModal();
-            await loadUsers(); // Recargar la lista de usuarios
-            alert('Usuario actualizado exitosamente');
-        } else {
-            throw new Error('Error al actualizar usuario');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert(error.message);
-    }
-});
-
-async function deleteUser(userId) {
-    if (confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
-        try {
-            const response = await fetch(`/api/users/${userId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-
-            if (response.ok) {
-                const userElement = document.querySelector(`[data-user-id="${userId}"]`);
-                if (userElement) {
-                    userElement.remove();
-                }
-                alert('Usuario eliminado correctamente');
-            } else {
-                throw new Error('Error al eliminar usuario');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert(error.message);
-        }
-    }
-}
-
+// Funciones para eventos
 async function loadEventos() {
     try {
         const response = await fetch('/api/events', {
@@ -187,6 +173,11 @@ async function loadEventos() {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
+
+        if (!response.ok) {
+            throw new Error('Error al cargar eventos');
+        }
+
         const eventos = await response.json();
         displayEventos(eventos);
     } catch (error) {
@@ -196,211 +187,203 @@ async function loadEventos() {
 
 function displayEventos(eventos) {
     const container = document.getElementById('eventosContainer');
-    container.innerHTML = `
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Categoría</th>
-                    <th>Fecha</th>
-                    <th>Localización</th>
-                    <th>Organizador</th>
-                    <th>Precio</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${eventos.map(evento => `
-                    <tr data-event-id="${evento.id}">
-                        <td>${evento.nombre}</td>
-                        <td>${evento.categoria}</td>
-                        <td>${new Date(evento.fecha).toLocaleString()}</td>
-                        <td>${evento.localizacion}</td>
-                        <td>${evento.organizador}</td>
-                        <td>${evento.precio}€</td>
-                        <td class="actions">
-                            <button onclick="editEvento('${evento.id}')" class="btn-primary">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button onclick="deleteEvento('${evento.id}')" class="btn-danger">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
+    if (!container) return;
+
+    container.innerHTML = eventos.map(evento => `
+        <div class="evento-card">
+            <h3>${evento.nombre}</h3>
+            <p><i class="fas fa-calendar"></i> ${new Date(evento.fecha).toLocaleDateString()}</p>
+            <p><i class="fas fa-map-marker-alt"></i> ${evento.localizacion}</p>
+            <p><i class="fas fa-tag"></i> ${evento.categoria}</p>
+            <div class="evento-actions">
+                <button onclick="editEvento('${evento.id}')" class="btn-primary">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+                <button onclick="deleteEvento('${evento.id}')" class="btn-danger">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    `).join('');
 }
 
-function showTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-    });
-    
-    document.querySelectorAll('.tab-button').forEach(button => {
-        button.classList.remove('active');
-    });
-    
-    document.getElementById(tabName).classList.add('active');
-    
-    event.target.classList.add('active');
-    
-    if (tabName === 'usuarios') {
-        loadUsers();
-    } else if (tabName === 'eventos') {
-        loadEventos();
-    }
-}
-
-function openCreateEventoModal() {
-    document.getElementById('createEventoModal').style.display = 'block';
-}
-
-function closeCreateEventoModal() {
-    const form = document.getElementById('createEventoForm');
-    form.reset();
-    form.dataset.mode = 'create';
-    delete form.dataset.eventId;
-    document.querySelector('#createEventoForm button[type="submit"]').textContent = 'Crear Evento';
-    document.getElementById('createEventoModal').style.display = 'none';
-}
-
-async function editEvento(id) {
+// Funciones globales para editar/eliminar usuarios
+window.editUser = async function(userId) {
     try {
-        const response = await fetch(`/api/events/${id}`);
-        const evento = await response.json();
-        
-        // Rellenar el formulario con los datos del evento
-        document.getElementById('createEventoNombre').value = evento.nombre;
-        document.getElementById('createEventoCategoria').value = evento.categoria;
-        document.getElementById('createEventoFecha').value = evento.fecha.slice(0, 16);
-        document.getElementById('createEventoLocalizacion').value = evento.localizacion;
-        document.getElementById('createEventoDireccion').value = evento.direccion || '';
-        document.getElementById('createEventoOrganizador').value = evento.organizador;
-        document.getElementById('createEventoPrecio').value = evento.precio;
-        document.getElementById('createEventoUrl').value = evento.url || '';
-
-        // Modificar el formulario para modo edición
-        const form = document.getElementById('createEventoForm');
-        form.dataset.mode = 'edit';
-        form.dataset.eventId = id;
-        
-        // Cambiar el texto del botón
-        document.querySelector('#createEventoForm button[type="submit"]').textContent = 'Guardar Cambios';
-        
-        // Mostrar el modal
-        openCreateEventoModal();
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al cargar el evento');
-    }
-}
-
-async function deleteEvento(id) {
-    if (confirm('¿Estás seguro de que quieres eliminar este evento?')) {
-        try {
-            const response = await fetch(`/api/events/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-
-            if (response.ok) {
-                // Eliminar el evento del DOM
-                const eventoElement = document.querySelector(`[data-event-id="${id}"]`);
-                if (eventoElement) {
-                    eventoElement.remove();
-                }
-                alert('Evento eliminado correctamente');
-            } else {
-                throw new Error('Error al eliminar el evento');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error al eliminar el evento');
-        }
-    }
-}
-
-// Modificar el event listener del formulario para manejar tanto creación como edición
-document.getElementById('createEventoForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const isEdit = this.dataset.mode === 'edit';
-    const eventId = this.dataset.eventId;
-    
-    const eventData = {
-        nombre: document.getElementById('createEventoNombre').value,
-        categoria: document.getElementById('createEventoCategoria').value,
-        fecha: document.getElementById('createEventoFecha').value,
-        localizacion: document.getElementById('createEventoLocalizacion').value,
-        direccion: document.getElementById('createEventoDireccion').value,
-        organizador: document.getElementById('createEventoOrganizador').value,
-        precio: document.getElementById('createEventoPrecio').value,
-        url: document.getElementById('createEventoUrl').value || null
-    };
-
-    try {
-        const response = await fetch(`/api/events${isEdit ? `/${eventId}` : ''}`, {
-            method: isEdit ? 'PUT' : 'POST',
+        const response = await fetch(`/api/users/${userId}`, {
             headers: {
-                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify(eventData)
+            }
         });
 
-        if (response.ok) {
-            const event = await response.json();
-            if (isEdit) {
-                // Actualizar el evento en la vista
-                const eventoElement = document.querySelector(`[data-event-id="${eventId}"]`);
-                if (eventoElement) {
-                    eventoElement.innerHTML = generateEventoHTML(event);
-                }
-            } else {
-                // Añadir el nuevo evento a la vista
-                const eventosContainer = document.getElementById('eventosContainer');
-                const eventoElement = document.createElement('div');
-                eventoElement.className = 'evento-card';
-                eventoElement.dataset.eventId = event.id;
-                eventoElement.innerHTML = generateEventoHTML(event);
-                eventosContainer.appendChild(eventoElement);
-            }
-            
-            closeCreateEventoModal();
-            alert(isEdit ? 'Evento actualizado exitosamente' : 'Evento creado exitosamente');
-        } else {
-            throw new Error(isEdit ? 'Error al actualizar evento' : 'Error al crear evento');
-        }
+        if (!response.ok) throw new Error('Error al obtener usuario');
+
+        const user = await response.json();
+        showEditUserModal(user);
     } catch (error) {
         console.error('Error:', error);
-        alert(error.message);
+        alert('Error al cargar los datos del usuario');
     }
-});
+}
 
-// Función auxiliar para generar el HTML de un evento
-function generateEventoHTML(evento) {
-    return `
-        <div class="evento-header">
-            <h3>${evento.nombre}</h3>
-            <span class="categoria">${evento.categoria}</span>
-        </div>
-        <div class="evento-body">
-            <p><i class="fas fa-calendar"></i> ${new Date(evento.fecha).toLocaleString()}</p>
-            <p><i class="fas fa-map-marker-alt"></i> ${evento.localizacion}</p>
-            <p><i class="fas fa-user"></i> ${evento.organizador}</p>
-            <p><i class="fas fa-euro-sign"></i> ${evento.precio}€</p>
-        </div>
-        <div class="evento-actions">
-            <button onclick="editEvento('${evento.id}')" class="btn-primary">
-                <i class="fas fa-edit"></i> Editar
-            </button>
-            <button onclick="deleteEvento('${evento.id}')" class="btn-danger">
-                <i class="fas fa-trash"></i> Eliminar
-            </button>
+function showEditUserModal(user) {
+    const modal = document.getElementById('editModal');
+    if (!modal) return;
+
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close" onclick="closeEditUserModal()">&times;</span>
+            <h2>Editar Usuario</h2>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId" value="${user.id}">
+                <div class="form-group">
+                    <label for="editNombre">Nombre:</label>
+                    <input type="text" id="editNombre" value="${user.nombre || ''}" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email:</label>
+                    <input type="email" id="editEmail" value="${user.email || ''}" required>
+                </div>
+                <div class="form-group">
+                    <label for="editUsername">Username:</label>
+                    <input type="text" id="editUsername" value="${user.username || ''}" required>
+                </div>
+                <div class="form-group">
+                    <label for="editRol">Rol:</label>
+                    <select id="editRol">
+                        <option value="usuario" ${user.rol === 'usuario' ? 'selected' : ''}>Usuario</option>
+                        <option value="admin" ${user.rol === 'admin' ? 'selected' : ''}>Admin</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Guardar Cambios</button>
+            </form>
         </div>
     `;
+
+    openModal('editModal');
+    setupEditUserForm();
+}
+
+function setupEditUserForm() {
+    const form = document.getElementById('editUserForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userId = document.getElementById('editUserId').value;
+        
+        const userData = {
+            nombre: document.getElementById('editNombre').value,
+            email: document.getElementById('editEmail').value,
+            username: document.getElementById('editUsername').value,
+            rol: document.getElementById('editRol').value
+        };
+
+        try {
+            const response = await fetch(`/api/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(userData)
+            });
+
+            if (!response.ok) throw new Error('Error al actualizar usuario');
+
+            closeModal('editModal');
+            loadUsers();
+            alert('Usuario actualizado correctamente');
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al actualizar el usuario');
+        }
+    });
+}
+
+window.closeEditUserModal = function() {
+    closeModal('editModal');
+}
+
+window.deleteUser = async function(userId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este usuario?')) return;
+    
+    try {
+        const response = await fetch(`/api/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) throw new Error('Error al eliminar usuario');
+
+        loadUsers();
+        alert('Usuario eliminado correctamente');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar el usuario');
+    }
+}
+
+// Funciones para eventos
+window.editEvento = async function(eventoId) {
+    try {
+        const response = await fetch(`/api/events/${eventoId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) throw new Error('Error al obtener evento');
+
+        const evento = await response.json();
+        showEditEventModal(evento);
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al cargar los datos del evento');
+    }
+}
+
+window.deleteEvento = async function(eventoId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este evento?')) return;
+    
+    try {
+        const response = await fetch(`/api/events/${eventoId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) throw new Error('Error al eliminar evento');
+
+        loadEventos();
+        alert('Evento eliminado correctamente');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar el evento');
+    }
+}
+
+function showEditEventModal(evento) {
+    const modal = document.getElementById('eventoModal');
+    if (!modal) return;
+
+    document.querySelector('#eventoModal h2').textContent = 'Editar Evento';
+    
+    const form = document.getElementById('eventoForm');
+    form.dataset.eventoId = evento.id;
+    
+    document.getElementById('nombreEvento').value = evento.nombre || '';
+    document.getElementById('categoriaEvento').value = evento.categoria || '';
+    document.getElementById('fechaEvento').value = evento.fecha ? new Date(evento.fecha).toISOString().slice(0, 16) : '';
+    document.getElementById('localizacionEvento').value = evento.localizacion || '';
+    document.getElementById('direccionEvento').value = evento.direccion || '';
+    document.getElementById('descripcionEvento').value = evento.descripcion || '';
+    document.getElementById('telefonoEvento').value = evento.telefono_contacto || '';
+    document.getElementById('organizadorEvento').value = evento.organizador || '';
+    document.getElementById('precioEvento').value = evento.precio || 0;
+
+    openModal('eventoModal');
 } 
