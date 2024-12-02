@@ -1255,9 +1255,8 @@ body {
 }
 /* Contenedor principal */
 .container {
-    background: none !important;
-    background-color: transparent !important;
-    box-shadow: none;
+    background: rgba(255, 255, 255, 0.2) !important; /* Blanco con 40% de opacidad */
+    box-shadow: none !important; /* Si deseas eliminar la sombra */
     border-radius: 15px;
     padding: 30px;
     margin: 20px auto;
@@ -1321,46 +1320,25 @@ body {
 
 /* Estilo para el fondo de la página de eventos */
 body.eventos-page {
-    background-image: url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
+    background-image: url('/imagenes/imagen1.jpg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-color: rgba(255, 0, 0, 0.5) !important; /* Color rojo semitransparente */
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-/* Eliminar TODOS los fondos que puedan interferir */
-body, 
-.container, 
+/* Hacer los contenedores pequeños con fondo blanco */
 .filters-container, 
-.evento,
-.modal-contenido,
-#mapa,
-.admin-section {
-    background: transparent !important;
-    box-shadow: none !important;
+.evento {
+    background: rgba(255, 255, 255, 0.85) !important; /* Blanco con 85% de opacidad */
+    box-shadow: none !important; /* Si deseas eliminar la sombra */
 }
 
-/* Asegurar que el body no tiene otros estilos de fondo */
+/* Asegurar que el body no tiene otros fondos */
 body {
     background: none !important;
     background-color: transparent !important;
-}
-
-/* Asegurar que el modal de perfil no hereda la transparencia */
-#ventanaPerfil {
-    background-color: rgba(0, 0, 0, 0.5) !important;  /* Fondo semi-transparente para el overlay */
-}
-
-/* Excluir el modal de perfil de los elementos transparentes */
-body, 
-.container, 
-.filters-container, 
-.evento,
-#mapa,
-.admin-section {
-    background: transparent !important;
-    box-shadow: none !important;
+    background-image: none !important;
 }
