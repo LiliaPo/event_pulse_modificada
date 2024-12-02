@@ -40,67 +40,46 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('eventoForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const form = e.target;
-        const eventoId = form.dataset.eventoId;
-        const isEdit = !!eventoId;
+        const formData = new FormData();
+        
+        // Añadir todos los campos del formulario
+        formData.append('nombre', document.getElementById('nombreEvento').value);
+        formData.append('categoria', document.getElementById('categoriaEvento').value);
+        formData.append('fecha', document.getElementById('fechaEvento').value);
+        formData.append('localizacion', document.getElementById('localizacionEvento').value);
+        formData.append('direccion', document.getElementById('direccionEvento').value);
+        formData.append('descripcion', document.getElementById('descripcionEvento').value);
+        formData.append('telefono_contacto', document.getElementById('telefonoEvento').value);
+        formData.append('organizador', document.getElementById('organizadorEvento').value);
+        formData.append('precio', document.getElementById('precioEvento').value);
 
-        const eventoData = {
-            nombre: document.getElementById('nombreEvento').value.trim(),
-            categoria: document.getElementById('categoriaEvento').value,
-            fecha: document.getElementById('fechaEvento').value,
-            localizacion: document.getElementById('localizacionEvento').value.trim(),
-            direccion: document.getElementById('direccionEvento').value.trim(),
-            descripcion: document.getElementById('descripcionEvento').value.trim(),
-            telefono_contacto: document.getElementById('telefonoEvento').value.trim(),
-            organizador: document.getElementById('organizadorEvento').value.trim(),
-            precio: parseFloat(document.getElementById('precioEvento').value) || 0
-        };
+        // Añadir la imagen si se seleccionó una
+        const imagenInput = document.getElementById('imagenEvento');
+        if (imagenInput.files[0]) {
+            formData.append('imagen', imagenInput.files[0]);
+        }
 
         try {
-            console.log('Modo:', isEdit ? 'edición' : 'creación');
-            console.log('ID del evento:', eventoId);
-            console.log('Datos a enviar:', eventoData);
-
-            const response = await fetch(
-                isEdit ? `/api/events/${eventoId}` : '/api/events',
-                {
-                    method: isEdit ? 'PUT' : 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify(eventoData)
-                }
-            );
-
-            const data = await response.json();
+            const response = await fetch('/api/events', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: formData  // Enviamos FormData en lugar de JSON
+            });
 
             if (!response.ok) {
-                throw new Error(data.message || `Error al ${isEdit ? 'actualizar' : 'crear'} el evento`);
+                throw new Error('Error al crear el evento');
             }
 
-            // Limpiar formulario y resetear estado
-            form.reset();
-            delete form.dataset.eventoId;
-            document.getElementById('btnSubmitEvento').textContent = 'Crear Evento';
-
-            // Cerrar modal
-            const modal = document.getElementById('eventoModal');
-            if (modal) {
-                modal.style.display = 'none';
-                document.querySelector('#eventoModal h2').textContent = 'Crear Evento';
-            }
-
-            // Recargar eventos
+            // Cerrar modal y recargar eventos
+            document.getElementById('eventoModal').style.display = 'none';
             await loadEventos();
             
-            alert(isEdit ? 
-                `El evento "${eventoData.nombre}" ha sido actualizado correctamente` : 
-                `El evento "${eventoData.nombre}" ha sido creado correctamente`
-            );
+            alert('Evento creado correctamente');
         } catch (error) {
-            console.error('Error completo:', error);
-            alert(error.message);
+            console.error('Error:', error);
+            alert('Error al crear el evento');
         }
     });
 

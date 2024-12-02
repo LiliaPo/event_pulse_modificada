@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        const nombre = document.getElementById('nombreLogin').value;
         const email = document.getElementById('emailLogin').value;
         const password = document.getElementById('passwordLogin').value;
 
@@ -13,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ nombre, email, password })
             });
 
             const data = await response.json();
@@ -37,5 +38,25 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error:', error);
             alert('Error al iniciar sesión');
         }
+    });
+
+    // Añadir validación de contraseña
+    document.getElementById('passwordLogin').addEventListener('input', function(e) {
+        const password = e.target.value;
+        const requirements = {
+            length: password.length >= 8,
+            upper: /[A-Z]/.test(password),
+            lower: /[a-z]/.test(password),
+            special: /[@$!%*?&]/.test(password)
+        };
+
+        // Actualizar el estilo del input
+        e.target.classList.toggle('invalid-input', !Object.values(requirements).every(Boolean));
+
+        // Actualizar los indicadores de requisitos
+        document.getElementById('lengthCheck').classList.toggle('valid', requirements.length);
+        document.getElementById('upperCheck').classList.toggle('valid', requirements.upper);
+        document.getElementById('lowerCheck').classList.toggle('valid', requirements.lower);
+        document.getElementById('specialCheck').classList.toggle('valid', requirements.special);
     });
 }); 

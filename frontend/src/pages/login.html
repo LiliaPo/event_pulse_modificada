@@ -22,9 +22,13 @@
             <a href="/" class="btn-volver">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>
-            <div class="container">
+            <div class="auth-container">
                 <h1>Iniciar Sesión</h1>
                 <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="nombreLogin">Nombre:</label>
+                        <input type="text" id="nombreLogin" required>
+                    </div>
                     <div class="form-group">
                         <label for="emailLogin">Email:</label>
                         <input type="email" id="emailLogin" required>
@@ -32,6 +36,15 @@
                     <div class="form-group">
                         <label for="passwordLogin">Contraseña:</label>
                         <input type="password" id="passwordLogin" required>
+                        <small class="password-requirements" id="passwordHint">
+                            La contraseña debe tener al menos:
+                            <ul>
+                                <li id="lengthCheck">8 caracteres</li>
+                                <li id="upperCheck">1 mayúscula</li>
+                                <li id="lowerCheck">1 minúscula</li>
+                                <li id="specialCheck">1 símbolo especial (@$!%*?&)</li>
+                            </ul>
+                        </small>
                     </div>
                     <button type="submit">Iniciar Sesión</button>
                 </form>
