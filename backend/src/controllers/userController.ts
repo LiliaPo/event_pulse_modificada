@@ -48,17 +48,14 @@ export const updateProfile = async (req: Request, res: Response) => {
 
         console.log('Datos recibidos:', { userEmail, nombre, email, imagen });
 
-        // Primero verificar si el usuario existe y obtener su ID
+        // Obtener el usuario por email
         const userQuery = await pool.query(
-            'SELECT id, rol FROM usuarios WHERE email = $1 AND rol != $2',
-            [userEmail, 'admin']
+            'SELECT id FROM usuarios WHERE email = $1',
+            [userEmail]
         );
 
         if (userQuery.rows.length === 0) {
-            return res.status(404).json({ 
-                message: 'Usuario no encontrado o no tiene permisos para actualizar el perfil',
-                debug: { userEmail }
-            });
+            return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
         const userId = userQuery.rows[0].id;
@@ -70,7 +67,7 @@ export const updateProfile = async (req: Request, res: Response) => {
                 email = $2, 
                 imagen_perfil = $3,
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = $4 AND rol != 'admin'
+            WHERE id = $4 
             RETURNING id, email, nombre, imagen_perfil
         `;
 

@@ -4,6 +4,7 @@
     height: 400px;
     border: 1px solid #ccc;
     margin: 0 auto 15px auto;
+    background-color: transparent;
 }
 
 /* Estilos para los eventos */
@@ -12,19 +13,19 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 25px;
     padding: 20px;
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
 }
 
 .evento {
-    background-color: white;
+    background-color: transparent;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     padding: 20px;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    max-width: 350px;
+    max-width: 250px;
     width: 100%;
     margin: 0 auto;
 }
@@ -36,7 +37,7 @@
 
 /* Estilos para los filtros */
 .filters-container {
-    background-color: white;
+    background-color: transparent;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -88,7 +89,7 @@
 }
 
 .modal-contenido {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: transparent;
     max-width: 450px;
     width: 90%;
     margin: 20px auto;
@@ -1249,7 +1250,7 @@ body {
 }
 /* Contenedor principal */
 .container {
-    background: rgba(255, 255, 255, 0.95);
+    background: transparent;
     border-radius: 15px;
     padding: 30px;
     box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
@@ -1312,3 +1313,16 @@ body {
     transform: scale(1.1);
 }
 
+/* Estilo para el fondo de la página de eventos */
+body.eventos-page {
+    background-image: url('../imagenes/imagen1.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    position: relative;  /* Importante para el z-index */
+    z-index: 0;  /* Asegura que el fondo esté detrás */
+}
