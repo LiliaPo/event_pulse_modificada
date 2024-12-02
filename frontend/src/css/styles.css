@@ -762,9 +762,9 @@ nav .btn-perfil:hover {
 }
 
 .evento-card {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.7) !important; /* Blanco con 85% de opacidad */
+    border-radius: 8px; /* Opcional: para bordes redondeados */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra opcional */
     margin-bottom: 15px;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -836,8 +836,9 @@ select.form-control {
 
 /* Estilos para las tarjetas de usuario */
 .user-card {
-    background: white;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.5) !important; /* Blanco con 85% de opacidad */
+    border-radius: 8px; /* Opcional: para bordes redondeados */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra opcional */
     padding: 20px;
     margin-bottom: 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -1341,4 +1342,20 @@ body {
     background: none !important;
     background-color: transparent !important;
     background-image: none !important;
+}
+
+/* Estilo para el contenedor de gestión de usuarios */
+#usuarios {
+    background: rgba(255, 255, 255, 0.3) !important; /* Blanco con 70% de opacidad */
+    border-radius: 10px; /* Opcional: para bordes redondeados */
+    padding: 20px; /* Opcional: para agregar espacio interno */
+    box-shadow: none !important; /* Si deseas eliminar la sombra */
+}
+
+/* Estilo para el contenedor de gestión de eventos */
+#eventos {
+    background: rgba(255, 255, 255, 0.3) !important; /* Blanco con 70% de opacidad */
+    border-radius: 10px; /* Opcional: para bordes redondeados */
+    padding: 20px; /* Opcional: para agregar espacio interno */
+    box-shadow: none !important; /* Si deseas eliminar la sombra */
 }
