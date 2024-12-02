@@ -40,46 +40,66 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('eventoForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const formData = new FormData();
-        
-        // Añadir todos los campos del formulario
-        formData.append('nombre', document.getElementById('nombreEvento').value);
-        formData.append('categoria', document.getElementById('categoriaEvento').value);
-        formData.append('fecha', document.getElementById('fechaEvento').value);
-        formData.append('localizacion', document.getElementById('localizacionEvento').value);
-        formData.append('direccion', document.getElementById('direccionEvento').value);
-        formData.append('descripcion', document.getElementById('descripcionEvento').value);
-        formData.append('telefono_contacto', document.getElementById('telefonoEvento').value);
-        formData.append('organizador', document.getElementById('organizadorEvento').value);
-        formData.append('precio', document.getElementById('precioEvento').value);
+        const form = e.target;
+        const eventoId = form.dataset.eventoId;
+        const isEdit = !!eventoId;
 
-        // Añadir la imagen si se seleccionó una
-        const imagenInput = document.getElementById('imagenEvento');
-        if (imagenInput.files[0]) {
-            formData.append('imagen', imagenInput.files[0]);
-        }
+        const eventoData = {
+            nombre: document.getElementById('nombreEvento').value.trim(),
+            categoria: document.getElementById('categoriaEvento').value,
+            fecha: document.getElementById('fechaEvento').value,
+            localizacion: document.getElementById('localizacionEvento').value.trim(),
+            direccion: document.getElementById('direccionEvento').value.trim(),
+            descripcion: document.getElementById('descripcionEvento').value.trim(),
+            organizador: document.getElementById('organizadorEvento').value.trim(),
+            precio: parseFloat(document.getElementById('precioEvento').value) || 0
+        };
 
         try {
-            const response = await fetch('/api/events', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: formData  // Enviamos FormData en lugar de JSON
-            });
+            console.log('Modo:', isEdit ? 'edición' : 'creación');
+            console.log('ID del evento:', eventoId);
+            console.log('Datos a enviar:', eventoData);
+
+            const response = await fetch(
+                isEdit ? `/api/events/${eventoId}` : '/api/events',
+                {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(eventoData)
+                }
+            );
+
+            const data = await response.json();
 
             if (!response.ok) {
-                throw new Error('Error al crear el evento');
+                throw new Error(data.message || `Error al ${isEdit ? 'actualizar' : 'crear'} el evento`);
             }
 
-            // Cerrar modal y recargar eventos
-            document.getElementById('eventoModal').style.display = 'none';
+            // Limpiar formulario y resetear estado
+            form.reset();
+            delete form.dataset.eventoId;
+            document.getElementById('btnSubmitEvento').textContent = 'Crear Evento';
+
+            // Cerrar modal
+            const modal = document.getElementById('eventoModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.querySelector('#eventoModal h2').textContent = 'Crear Evento';
+            }
+
+            // Recargar eventos
             await loadEventos();
             
-            alert('Evento creado correctamente');
+            alert(isEdit ? 
+                `El evento "${eventoData.nombre}" ha sido actualizado correctamente` : 
+                `El evento "${eventoData.nombre}" ha sido creado correctamente`
+            );
         } catch (error) {
-            console.error('Error:', error);
-            alert('Error al crear el evento');
+            console.error('Error completo:', error);
+            alert(error.message);
         }
     });
 
@@ -375,14 +395,6 @@ window.deleteUser = async function(userId) {
 // Funciones para eventos
 window.editEvento = async function(eventoId) {
     try {
-        const modal = document.getElementById('eventoModal');
-        const form = document.getElementById('eventoForm');
-        const submitBtn = document.getElementById('btnSubmitEvento');
-
-        if (!modal || !form || !submitBtn) {
-            throw new Error('No se encontraron los elementos necesarios');
-        }
-
         const response = await fetch(`/api/events/${eventoId}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -394,45 +406,32 @@ window.editEvento = async function(eventoId) {
         }
 
         const evento = await response.json();
-        console.log('Evento a editar:', evento);
+        const modal = document.getElementById('eventoModal');
+        const form = document.getElementById('eventoForm');
+        const submitBtn = document.getElementById('btnSubmitEvento');
 
-        // Limpiar formulario
-        form.reset();
+        // Establecer el ID del evento en el formulario
         form.dataset.eventoId = evento.id;
 
-        // Lista de campos a rellenar
-        const campos = {
-            nombreEvento: evento.nombre,
-            categoriaEvento: evento.categoria,
-            fechaEvento: evento.fecha ? new Date(evento.fecha).toISOString().slice(0, 16) : '',
-            localizacionEvento: evento.localizacion,
-            direccionEvento: evento.direccion,
-            descripcionEvento: evento.descripcion,
-            telefonoEvento: evento.telefono_contacto,
-            organizadorEvento: evento.organizador,
-            precioEvento: evento.precio || 0
-        };
-
-        // Rellenar campos
-        for (const [id, valor] of Object.entries(campos)) {
-            const elemento = document.getElementById(id);
-            if (elemento) {
-                elemento.value = valor || '';
-                console.log(`Campo ${id} rellenado con:`, valor);
-            } else {
-                console.error(`No se encontró el elemento con id: ${id}`);
-            }
-        }
-
-        // Cambiar textos
+        // Cambiar título del modal
         modal.querySelector('h2').textContent = 'Editar Evento';
         submitBtn.textContent = 'Actualizar Evento';
+
+        // Rellenar campos
+        document.getElementById('nombreEvento').value = evento.nombre || '';
+        document.getElementById('categoriaEvento').value = evento.categoria || '';
+        document.getElementById('fechaEvento').value = evento.fecha ? new Date(evento.fecha).toISOString().slice(0, 16) : '';
+        document.getElementById('localizacionEvento').value = evento.localizacion || '';
+        document.getElementById('direccionEvento').value = evento.direccion || '';
+        document.getElementById('descripcionEvento').value = evento.descripcion || '';
+        document.getElementById('organizadorEvento').value = evento.organizador || '';
+        document.getElementById('precioEvento').value = evento.precio || 0;
 
         // Mostrar modal
         modal.style.display = 'block';
     } catch (error) {
-        console.error('Error detallado:', error);
-        alert('Error al cargar los datos del evento: ' + error.message);
+        console.error('Error:', error);
+        alert('Error al cargar los datos del evento');
     }
 }
 
@@ -472,9 +471,8 @@ function showEditEventModal(evento) {
     document.getElementById('localizacionEvento').value = evento.localizacion || '';
     document.getElementById('direccionEvento').value = evento.direccion || '';
     document.getElementById('descripcionEvento').value = evento.descripcion || '';
-    document.getElementById('telefonoEvento').value = evento.telefono_contacto || '';
     document.getElementById('organizadorEvento').value = evento.organizador || '';
     document.getElementById('precioEvento').value = evento.precio || 0;
 
     openModal('eventoModal');
-} 
+}  

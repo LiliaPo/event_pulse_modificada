@@ -203,7 +203,6 @@ export const updateEvent = async (req: Request, res: Response) => {
             localizacion,
             direccion,
             descripcion,
-            telefono_contacto,
             organizador,
             precio
         } = req.body;
@@ -225,13 +224,12 @@ export const updateEvent = async (req: Request, res: Response) => {
                  localizacion = $4,
                  direccion = $5,
                  descripcion = $6,
-                 telefono_contacto = $7,
-                 organizador = $8,
-                 precio = $9,
-                 lat = COALESCE($10, lat),
-                 lng = COALESCE($11, lng),
+                 organizador = $7,
+                 precio = $8,
+                 lat = COALESCE($9, lat),
+                 lng = COALESCE($10, lng),
                  updated_at = CURRENT_TIMESTAMP
-             WHERE id = $12 
+             WHERE id = $11 
              RETURNING *`,
             [
                 nombre,
@@ -240,7 +238,6 @@ export const updateEvent = async (req: Request, res: Response) => {
                 localizacion,
                 direccion || null,
                 descripcion || null,
-                telefono_contacto || null,
                 organizador || null,
                 parseFloat(precio) || 0,
                 coordenadas ? coordenadas.lat : null,
