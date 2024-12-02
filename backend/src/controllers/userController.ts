@@ -39,24 +39,29 @@ export const getUserProfile = async (req: Request, res: Response) => {
 
 export const updateProfile = async (req: Request, res: Response) => {
     try {
-        const userId = req.user?.id;
+        const userEmail = req.user?.email;
         const { nombre, email, imagen } = req.body;
 
-        if (!userId) {
+        if (!userEmail) {
             return res.status(401).json({ message: 'Usuario no autenticado' });
         }
 
-        console.log('Datos recibidos:', { userId, nombre, email });
+        console.log('Datos recibidos:', { userEmail, nombre, email, imagen });
 
-        // Primero verificar si el usuario existe
-        const userExists = await pool.query(
-            'SELECT id FROM usuarios WHERE id = $1',
-            [userId]
+        // Primero verificar si el usuario existe y obtener su ID
+        const userQuery = await pool.query(
+            'SELECT id, rol FROM usuarios WHERE email = $1 AND rol != $2',
+            [userEmail, 'admin']
         );
 
-        if (userExists.rows.length === 0) {
-            return res.status(404).json({ message: 'Usuario no encontrado' });
+        if (userQuery.rows.length === 0) {
+            return res.status(404).json({ 
+                message: 'Usuario no encontrado o no tiene permisos para actualizar el perfil',
+                debug: { userEmail }
+            });
         }
+
+        const userId = userQuery.rows[0].id;
 
         // Realizar la actualización
         const query = `
@@ -65,7 +70,7 @@ export const updateProfile = async (req: Request, res: Response) => {
                 email = $2, 
                 imagen_perfil = $3,
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = $4 
+            WHERE id = $4 AND rol != 'admin'
             RETURNING id, email, nombre, imagen_perfil
         `;
 

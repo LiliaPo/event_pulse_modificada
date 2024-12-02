@@ -1312,13 +1312,3 @@ body {
     transform: scale(1.1);
 }
 
-/* Estilo específico para el fondo de la página de eventos */
-body.eventos-page {
-    background-image: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), 
-                      url('../imagenes/imagen1.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    min-height: 100vh;
-}
-

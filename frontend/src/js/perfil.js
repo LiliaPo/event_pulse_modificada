@@ -26,88 +26,61 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Cargar datos del perfil
-    function cargarDatosPerfil() {
-        const nombreInput = document.getElementById('nombreUsuario');
-        const emailInput = document.getElementById('emailUsuario');
+    // Manejar el envío del formulario
+    perfilForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const userData = {
+            nombre: document.getElementById('nombreUsuario').value,
+            email: document.getElementById('emailUsuario').value,
+            imagen: selectedAvatar
+        };
 
-        if (nombreInput && emailInput) {
-            nombreInput.value = localStorage.getItem('userName') || '';
-            emailInput.value = localStorage.getItem('userEmail') || '';
-        }
+        console.log('Enviando datos:', userData);
 
-        selectedAvatar = localStorage.getItem('userAvatar') || '👤';
-        actualizarAvatares();
-    }
+        try {
+            const response = await fetch('/api/users/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(userData)
+            });
 
-    // Abrir modal de perfil
-    if (btnPerfil) {
-        btnPerfil.addEventListener('click', () => {
-            if (modalPerfil) {
-                modalPerfil.style.display = 'block';
-                cargarDatosPerfil();
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al actualizar el perfil');
             }
-        });
-    }
+
+            const data = await response.json();
+            
+            // Actualizar localStorage
+            localStorage.setItem('userName', data.nombre);
+            localStorage.setItem('userEmail', data.email);
+            localStorage.setItem('userAvatar', selectedAvatar);
+
+            // Actualizar UI
+            actualizarAvatares();
+            
+            alert('Perfil actualizado correctamente');
+            modalPerfil.style.display = 'none';
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message || 'Error al actualizar el perfil');
+        }
+    });
+
+    // Cargar datos cuando se abre el modal
+    btnPerfil.addEventListener('click', () => {
+        modalPerfil.style.display = 'block';
+        document.getElementById('nombreUsuario').value = localStorage.getItem('userName') || '';
+        document.getElementById('emailUsuario').value = localStorage.getItem('userEmail') || '';
+        actualizarAvatares();
+    });
 
     // Cerrar modal
-    if (btnCerrar) {
-        btnCerrar.addEventListener('click', () => {
-            if (modalPerfil) {
-                modalPerfil.style.display = 'none';
-            }
-        });
-    }
-
-    // Manejar el envío del formulario
-    if (perfilForm) {
-        perfilForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            try {
-                const userData = {
-                    nombre: document.getElementById('nombreUsuario').value,
-                    email: document.getElementById('emailUsuario').value,
-                    avatar: selectedAvatar
-                };
-
-                console.log('Enviando datos:', userData);
-
-                const response = await fetch('/api/users/profile', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify(userData)
-                });
-
-                if (!response.ok) {
-                    throw new Error('Error al actualizar el perfil');
-                }
-
-                const data = await response.json();
-                localStorage.setItem('userName', data.nombre);
-                localStorage.setItem('userEmail', data.email);
-                localStorage.setItem('userAvatar', selectedAvatar);
-
-                // Actualizar avatar en la navegación
-                const navAvatar = document.querySelector('.foto-perfil-nav');
-                if (navAvatar) {
-                    navAvatar.textContent = selectedAvatar;
-                }
-
-                alert('Perfil actualizado correctamente');
-                if (modalPerfil) {
-                    modalPerfil.style.display = 'none';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert(error.message || 'Error al guardar los cambios');
-            }
-        });
-    }
-
-    // Inicializar avatar al cargar la página
-    actualizarAvatares();
+    btnCerrar.addEventListener('click', () => {
+        modalPerfil.style.display = 'none';
+    });
 });
