@@ -83,13 +83,12 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
     overflow-y: auto;
     padding: 20px;
 }
 
 .modal-contenido {
-    background-color: white;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     max-width: 450px;
     width: 90%;
     margin: 20px auto;
@@ -397,7 +396,6 @@ body.auth-page {
     background-position: center;
     background-attachment: fixed;
 }
-
 .auth-container {
     max-width: 400px;
     width: 90%;
@@ -561,13 +559,35 @@ nav .btn-perfil:hover {
 
 /* Estilo para el título de Filtro de Eventos */
 #seccionEventos h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 46px;
+    color: #5a75a5;
+    text-shadow: 
+        2px 2px 0 #34495e,
+        4px 4px 0 rgba(52, 73, 94, 0.4),
+        0 0 20px rgba(52, 73, 94, 0.2);
     text-align: center;
-    color: #2a5783;  /* Color más oscuro */
-    font-size: 2em;
     margin-bottom: 20px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    text-shadow: 1px 1px 2px rgba(35, 22, 70, 0.1);
+    letter-spacing: 0.1em;
+    font-weight: 800;
+    animation: fadeIn 1s ease-out;
+    -webkit-text-stroke: 1px #34495e;
+    transition: all 0.3s ease;
+}
+
+#seccionEventos h1:hover {
+    transform: scale(1.05);
+    color: #6d8cc7;
+    text-shadow: 
+        3px 3px 0 #34495e,
+        6px 6px 0 rgba(52, 73, 94, 0.4),
+        0 0 30px rgba(52, 73, 94, 0.3);
+    letter-spacing: 0.15em;
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
 }
 
 #filtrar {
@@ -1227,7 +1247,6 @@ body {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     min-height: 100vh;
 }
-
 /* Contenedor principal */
 .container {
     background: rgba(255, 255, 255, 0.95);
@@ -1237,3 +1256,69 @@ body {
     margin: 20px auto;
     max-width: 1200px;
 }
+
+.portada-contenido .btn-auth {
+    background-color: #3498db;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    margin: 20px auto;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.portada-contenido .btn-auth:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+}
+
+/* Estilos para los botones de la portada */
+.portada-contenido .btn-login,
+.portada-contenido .btn-admin,
+.portada-contenido .btn-invitado {
+    background: linear-gradient(90deg, hsl(236, 34%, 28%), #171f29);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    font-style: italic;
+    font-family: 'Poppins', sans-serif;
+    padding: 8px 16px;
+    margin: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+    border: none;
+}
+
+.portada-contenido .btn-login:hover,
+.portada-contenido .btn-admin:hover,
+.portada-contenido .btn-invitado:hover {
+    background: linear-gradient(90deg, #4d438b, #1a2c3d);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    transform: scale(1.1);
+}
+
+/* Estilo específico para el fondo de la página de eventos */
+body.eventos-page {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), 
+                      url('../imagenes/imagen1.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+

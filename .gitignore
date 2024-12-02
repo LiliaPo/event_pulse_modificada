@@ -19,3 +19,11 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Ignorar archivos de imagen en uploads pero mantener la estructura
+/frontend/src/uploads/eventos/*
+!/frontend/src/uploads/eventos/.gitkeep
+
+# Ignorar archivos de imagen en public pero mantener la estructura
+/frontend/public/images/eventos/*
+!/frontend/public/images/eventos/.gitkeep
