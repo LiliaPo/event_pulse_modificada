@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const formMensaje = document.getElementById('formMensaje');
     const mensajeInput = document.getElementById('mensajeChat');
 
+    if (formMensaje) {
+        formMensaje.addEventListener('submit', enviarMensaje);
+    }
+
     // Abrir foro general
     document.getElementById('abrirForo').addEventListener('click', () => {
         ventanaForo.style.display = 'block';
@@ -38,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Enviar mensaje
-    formMensaje.addEventListener('submit', async (e) => {
+    async function enviarMensaje(e) {
         e.preventDefault();
         const mensaje = mensajeInput.value.trim();
         if (!mensaje) return;
@@ -60,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error al enviar mensaje:', error);
         }
-    });
+    }
 
     // Cerrar foro
     document.querySelector('#ventanaForo .cerrar').addEventListener('click', () => {
