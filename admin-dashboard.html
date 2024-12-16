@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Administrador</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .users-table th, .users-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .users-table th {
+            background-color: #f5f5f5;
+        }
+        .search-bar {
+            margin: 20px 0;
+            padding: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+        .action-button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .edit-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .users-table td:first-child {
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* Estilos para el modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow-y: auto; /* Permite scroll vertical */
+            padding: 20px; /* Añade padding para evitar que el contenido toque los bordes */
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto; /* Centra el contenido y añade margen */
+            position: relative; /* Cambiado de absolute a relative */
+            top: auto; /* Eliminado el posicionamiento absoluto */
+            left: auto;
+            transform: none; /* Eliminada la transformación */
+        }
+        
+        /* Estilos para el formulario */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box; /* Asegura que el padding no afecte el ancho */
+        }
+        
+        .form-group textarea {
+            resize: vertical; /* Permite redimensionar verticalmente */
+            min-height: 100px;
+        }
+        
+        /* Botones del formulario */
+        .modal-content .action-button {
+            margin-top: 15px;
+            padding: 10px 20px;
+        }
+        
+        /* Espacio adicional al final del modal */
+        .modal-content form {
+            margin-bottom: 20px;
+        }
+        
+        /* Estilos para las pestañas */
+        .tabs {
+            margin: 20px 0;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .tab-button.active {
+            border-bottom: 3px solid #4CAF50;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Estilos para la tabla de eventos */
+        .eventos-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .eventos-table th, .eventos-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .eventos-table th {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Panel de Administración</h1>
+        
+        <!-- Pestañas -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('usuarios')">Gestión de Usuarios</button>
+            <button class="tab-button" onclick="showTab('eventos')">Gestión de Eventos</button>
+        </div>
+        
+        <!-- Contenido de Usuarios -->
+        <div id="usuarios" class="tab-content active">
+            <input type="text" id="searchUser" class="search-bar" placeholder="Buscar usuario...">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Username</th>
+                        <th>Teléfono</th>
+                        <th>WhatsApp</th>
+                        <th>Instagram</th>
+                        <th>Rol</th>
+                        <th>Fecha Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <!-- Los usuarios se cargarán aquí dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Contenido de Eventos -->
+        <div id="eventos" class="tab-content">
+            <!-- Agregar botón para crear evento -->
+            <button id="createEventoBtn" class="action-button" 
+                    style="background-color: #2196F3; color: white; margin-bottom: 20px;">
+                Crear Nuevo Evento
+            </button>
+            
+            <input type="text" id="searchEvento" class="search-bar" placeholder="Buscar evento...">
+            <table class="eventos-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Fecha</th>
+                        <th>Localización</th>
+                        <th>Organizador</th>
+                        <th>Precio</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="eventosTableBody">
+                    <!-- Los eventos se cargarán aquí dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal para editar usuario -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h2>Editar Usuario</h2>
+            <form id="editForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label for="editNombre">Nombre:</label>
+                    <input type="text" id="editNombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email:</label>
+                    <input type="email" id="editEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="editUsername">Username:</label>
+                    <input type="text" id="editUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="editTelefono">Teléfono:</label>
+                    <input type="tel" id="editTelefono">
+                </div>
+                <div class="form-group">
+                    <label for="editWhatsapp">WhatsApp:</label>
+                    <input type="tel" id="editWhatsapp">
+                </div>
+                <div class="form-group">
+                    <label for="editInstagram">Instagram:</label>
+                    <input type="text" id="editInstagram">
+                </div>
+                <div class="form-group">
+                    <label for="editRol">Rol:</label>
+                    <select id="editRol" required>
+                        <option value="usuario">Usuario</option>
+                        <option value="moderador">Moderador</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <button type="submit" class="action-button edit-btn">Guardar Cambios</button>
+                <button type="button" onclick="closeEditModal()" class="action-button delete-btn">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para crear/editar evento -->
+    <div id="editEventoModal" class="modal">
+        <div class="modal-content">
+            <h2 id="eventoModalTitle">Editar Evento</h2>
+            <form id="editEventoForm">
+                <input type="hidden" id="editEventoId">
+                <div class="form-group">
+                    <label for="editEventoNombre">Nombre:</label>
+                    <input type="text" id="editEventoNombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEventoCategoria">Categoría:</label>
+                    <select id="editEventoCategoria" required>
+                        <option value="Música">Música</option>
+                        <option value="Teatro">Teatro</option>
+                        <option value="Deportes">Deportes</option>
+                        <option value="Arte">Arte</option>
+                        <option value="Tecnología">Tecnología</option>
+                        <option value="Gastronomía">Gastronomía</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editEventoSubcategoria">Subcategoría:</label>
+                    <input type="text" id="editEventoSubcategoria">
+                </div>
+                <div class="form-group">
+                    <label for="editEventoFecha">Fecha:</label>
+                    <input type="datetime-local" id="editEventoFecha" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEventoLocalizacion">Localización:</label>
+                    <input type="text" id="editEventoLocalizacion" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEventoDireccion">Dirección:</label>
+                    <input type="text" id="editEventoDireccion">
+                </div>
+                <div class="form-group">
+                    <label for="editEventoOrganizador">Organizador:</label>
+                    <input type="text" id="editEventoOrganizador" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEventoPrecio">Precio:</label>
+                    <input type="number" id="editEventoPrecio" step="0.01" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="editEventoDescripcion">Descripción:</label>
+                    <textarea id="editEventoDescripcion" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editEventoUrl">URL del evento:</label>
+                    <input type="url" id="editEventoUrl">
+                </div>
+                <button type="submit" class="action-button edit-btn">Guardar</button>
+                <button type="button" onclick="closeEditEventoModal()" class="action-button delete-btn">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let users = [];
+        let loadUsers; // Declaramos loadUsers en el scope global
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const searchInput = document.getElementById('searchUser');
+            const tableBody = document.getElementById('usersTableBody');
+
+            // Definimos loadUsers como una función global
+            loadUsers = async function() {
+                try {
+                    const response = await fetch('/api/users/all');
+                    users = await response.json();
+                    displayUsers(users);
+                } catch (error) {
+                    console.error('Error al cargar usuarios:', error);
+                }
+            };
+
+            // Mostrar usuarios en la tabla
+            function displayUsers(usersToShow) {
+                tableBody.innerHTML = usersToShow.map(user => `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.nombre}</td>
+                        <td>${user.email}</td>
+                        <td>${user.username}</td>
+                        <td>${user.telefono || '-'}</td>
+                        <td>${user.whatsapp || '-'}</td>
+                        <td>${user.instagram || '-'}</td>
+                        <td>${user.rol}</td>
+                        <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="action-button edit-btn" onclick="editUser('${user.id}')">
+                                Editar
+                            </button>
+                            <button class="action-button delete-btn" onclick="deleteUser('${user.id}')">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Filtrar usuarios
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredUsers = users.filter(user => 
+                    user.nombre.toLowerCase().includes(searchTerm) ||
+                    user.email.toLowerCase().includes(searchTerm)
+                );
+                displayUsers(filteredUsers);
+            });
+
+            // Cargar usuarios al iniciar
+            await loadUsers();
+        });
+
+        const modal = document.getElementById('editModal');
+        const editForm = document.getElementById('editForm');
+
+        // Función para abrir el modal de edición
+        async function editUser(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+
+            // Rellenar el formulario con los datos del usuario
+            document.getElementById('editUserId').value = user.id;
+            document.getElementById('editNombre').value = user.nombre;
+            document.getElementById('editEmail').value = user.email;
+            document.getElementById('editUsername').value = user.username;
+            document.getElementById('editTelefono').value = user.telefono || '';
+            document.getElementById('editWhatsapp').value = user.whatsapp || '';
+            document.getElementById('editInstagram').value = user.instagram || '';
+            document.getElementById('editRol').value = user.rol;
+
+            // Mostrar el modal
+            modal.style.display = 'block';
+        }
+
+        // Función para cerrar el modal
+        function closeEditModal() {
+            modal.style.display = 'none';
+        }
+
+        // Manejar el envío del formulario de edición
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('editUserId').value;
+
+            const userData = {
+                nombre: document.getElementById('editNombre').value,
+                email: document.getElementById('editEmail').value,
+                username: document.getElementById('editUsername').value,
+                telefono: document.getElementById('editTelefono').value,
+                whatsapp: document.getElementById('editWhatsapp').value,
+                instagram: document.getElementById('editInstagram').value,
+                rol: document.getElementById('editRol').value
+            };
+
+            try {
+                const response = await fetch(`/api/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                if (response.ok) {
+                    closeEditModal();
+                    await loadUsers(); // Recargar la lista de usuarios
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Error al actualizar usuario');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al actualizar usuario');
+            }
+        });
+
+        // Función para eliminar usuario
+        async function deleteUser(userId) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.')) return;
+
+            try {
+                const response = await fetch(`/api/users/${userId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    await loadUsers(); // Recargar la lista de usuarios
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Error al eliminar usuario');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al eliminar usuario');
+            }
+        }
+
+        // Función para cambiar entre pestañas
+        function showTab(tabName) {
+            // Ocultar todos los contenidos
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Desactivar todos los botones
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Mostrar el contenido seleccionado
+            document.getElementById(tabName).classList.add('active');
+            
+            // Activar el botón seleccionado
+            event.target.classList.add('active');
+            
+            // Cargar datos según la pestaña
+            if (tabName === 'usuarios') {
+                loadUsers();
+            } else if (tabName === 'eventos') {
+                loadEventos();
+            }
+        }
+
+        // Función para cargar eventos
+        async function loadEventos() {
+            try {
+                const response = await fetch('/api/eventos/all');
+                const eventos = await response.json();
+                displayEventos(eventos);
+            } catch (error) {
+                console.error('Error al cargar eventos:', error);
+            }
+        }
+
+        // Función para mostrar eventos
+        function displayEventos(eventos) {
+            const tbody = document.getElementById('eventosTableBody');
+            tbody.innerHTML = eventos.map(evento => `
+                <tr>
+                    <td>${evento.id}</td>
+                    <td>${evento.nombre}</td>
+                    <td>${evento.categoria}</td>
+                    <td>${new Date(evento.fecha).toLocaleString()}</td>
+                    <td>${evento.localizacion}</td>
+                    <td>${evento.organizador}</td>
+                    <td>${evento.precio ? `$${evento.precio}` : 'Gratis'}</td>
+                    <td>
+                        <button class="action-button edit-btn" onclick="editEvento('${evento.id}')">
+                            Editar
+                        </button>
+                        <button class="action-button delete-btn" onclick="deleteEvento('${evento.id}')">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Funciones para el modal de eventos
+        const eventoModal = document.getElementById('editEventoModal');
+        const editEventoForm = document.getElementById('editEventoForm');
+
+        async function editEvento(eventoId) {
+            try {
+                const response = await fetch(`/api/eventos/${eventoId}`);
+                const evento = await response.json();
+                
+                document.getElementById('editEventoId').value = evento.id;
+                document.getElementById('editEventoNombre').value = evento.nombre;
+                document.getElementById('editEventoCategoria').value = evento.categoria;
+                document.getElementById('editEventoFecha').value = evento.fecha.slice(0, 16);
+                document.getElementById('editEventoLocalizacion').value = evento.localizacion;
+                document.getElementById('editEventoDireccion').value = evento.direccion || '';
+                document.getElementById('editEventoOrganizador').value = evento.organizador;
+                document.getElementById('editEventoPrecio').value = evento.precio || '';
+
+                eventoModal.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar el evento');
+            }
+        }
+
+        function closeEditEventoModal() {
+            eventoModal.style.display = 'none';
+        }
+
+        // Agregar evento al botón de crear
+        document.getElementById('createEventoBtn').addEventListener('click', () => {
+            document.getElementById('eventoModalTitle').textContent = 'Crear Nuevo Evento';
+            document.getElementById('editEventoId').value = '';
+            document.getElementById('editEventoForm').reset();
+            document.getElementById('editEventoModal').style.display = 'block';
+        });
+
+        // Modificar el manejador del formulario para soportar creación
+        editEventoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const eventoId = document.getElementById('editEventoId').value;
+            const isCreating = !eventoId;
+
+            const eventoData = {
+                nombre: document.getElementById('editEventoNombre').value,
+                categoria: document.getElementById('editEventoCategoria').value,
+                subcategoria: document.getElementById('editEventoSubcategoria').value,
+                fecha: document.getElementById('editEventoFecha').value,
+                localizacion: document.getElementById('editEventoLocalizacion').value,
+                direccion: document.getElementById('editEventoDireccion').value,
+                organizador: document.getElementById('editEventoOrganizador').value,
+                precio: document.getElementById('editEventoPrecio').value,
+                descripcion: document.getElementById('editEventoDescripcion').value,
+                url: document.getElementById('editEventoUrl').value
+            };
+
+            try {
+                const url = isCreating ? '/api/eventos' : `/api/eventos/${eventoId}`;
+                const method = isCreating ? 'POST' : 'PUT';
+
+                console.log('Enviando datos:', eventoData);
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(eventoData)
+                });
+
+                const data = await response.json();
+                console.log('Respuesta del servidor:', data);
+
+                if (response.ok) {
+                    closeEditEventoModal();
+                    await loadEventos(); // Aseguramos que se recarguen los eventos
+                    alert(isCreating ? 'Evento creado exitosamente' : 'Evento actualizado exitosamente');
+                } else {
+                    alert(data.message || `Error al ${isCreating ? 'crear' : 'actualizar'} evento`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error al ${isCreating ? 'crear' : 'actualizar'} evento`);
+            }
+        });
+
+        async function deleteEvento(eventoId) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este evento? Esta acción no se puede deshacer.')) return;
+
+            try {
+                const response = await fetch(`/api/eventos/${eventoId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadEventos();
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Error al eliminar evento');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al eliminar evento');
+            }
+        }
+
+        // Cargar eventos al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUsers();
+            // No cargamos eventos inicialmente, se cargarán al hacer clic en la pestaña
+        });
+    </script>
+</body>
+</html> 

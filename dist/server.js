@@ -1,47 +1,102 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
-const dotenv_1 = __importDefault(require("dotenv"));
-const path_1 = __importDefault(require("path"));
-const user_routes_1 = __importDefault(require("./routes/user.routes"));
-const open_1 = __importDefault(require("open"));
-dotenv_1.default.config();
-const app = (0, express_1.default)();
-app.use((0, cors_1.default)());
-app.use(express_1.default.json());
-// Servir archivos estáticos
-app.use(express_1.default.static(path_1.default.join(__dirname, '../')));
-// Rutas API
-app.use('/api/users', user_routes_1.default);
-// Rutas para las páginas
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import userRoutes from './routes/userRoutes.js';
+import jwt from 'jsonwebtoken';
+import { pool } from './config/database.js';
+import crypto from 'crypto';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config();
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use('/api/users', userRoutes);
+app.post('/api/admin/login', (req, res) => {
+    const { email, password } = req.body;
+    if (email === 'admin@admin.com' && password === 'admin123') {
+        const token = jwt.sign({ id: 'admin', email }, 'tu_clave_secreta_muy_segura', { expiresIn: '24h' });
+        return res.json({
+            message: 'Login exitoso',
+            token,
+            admin: { id: 'admin', email }
+        });
+    }
+    return res.status(401).json({ message: 'Credenciales inválidas' });
+});
+app.get('/api/eventos/all', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM eventos ORDER BY fecha DESC');
+        res.json(result.rows);
+    }
+    catch (error) {
+        console.error('Error al obtener eventos:', error);
+        res.status(500).json({ message: 'Error al obtener eventos' });
+    }
+});
+app.post('/api/eventos', async (req, res) => {
+    try {
+        const { nombre, categoria, subcategoria, fecha, localizacion, direccion, organizador, precio, descripcion, url } = req.body;
+        const result = await pool.query(`
+            INSERT INTO eventos (
+                id,
+                nombre,
+                categoria,
+                subcategoria,
+                fecha,
+                localizacion,
+                direccion,
+                organizador,
+                precio,
+                descripcion,
+                url,
+                created_at,
+                updated_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            RETURNING *
+        `, [
+            crypto.randomUUID(),
+            nombre,
+            categoria,
+            subcategoria || null,
+            new Date(fecha),
+            localizacion,
+            direccion || null,
+            organizador,
+            precio ? parseFloat(precio) : null,
+            descripcion || null,
+            url || null
+        ]);
+        res.status(201).json({
+            message: 'Evento creado exitosamente',
+            evento: result.rows[0]
+        });
+    }
+    catch (error) {
+        console.error('Error al crear evento:', error);
+        res.status(500).json({ message: 'Error al crear evento' });
+    }
+});
+app.use(express.static(path.join(__dirname, '../')));
+// Rutas HTML
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../index.html'));
+});
 app.get('/login', (req, res) => {
-    res.sendFile(path_1.default.join(__dirname, '../login.html'));
+    res.sendFile(path.join(__dirname, '../login.html'));
 });
 app.get('/registro', (req, res) => {
-    res.sendFile(path_1.default.join(__dirname, '../registro.html'));
+    res.sendFile(path.join(__dirname, '../registro.html'));
 });
-app.get('/guest', (req, res) => {
-    res.sendFile(path_1.default.join(__dirname, '../EventPulse/index.html'));
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, '../administrador.html'));
 });
-app.get('/', (req, res) => {
-    res.sendFile(path_1.default.join(__dirname, '../index.html'));
+app.get('/admin-dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../admin-dashboard.html'));
 });
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => __awaiter(void 0, void 0, void 0, function* () {
+app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
-    // Abre automáticamente el navegador
-    yield (0, open_1.default)(`http://localhost:${PORT}`);
-}));
+});

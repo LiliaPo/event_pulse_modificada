@@ -104,7 +104,7 @@
 
                 const data = await response.json();
 
-                if (data.success) {
+                if (response.ok) {
                     window.location.href = '/EventPulse/index.html';
                 } else {
                     alert('Error en el login: ' + data.error);

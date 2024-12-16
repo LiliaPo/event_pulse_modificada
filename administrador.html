@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EventosFiltro</title>
+    <title>Administrador - EventosFiltro</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 </head>
 <body>
     <div class="portada" id="portada">
@@ -21,15 +19,26 @@
             <div class="evento-item" style="background-image: url('https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
         </div>
         <div class="portada-contenido">
-            <h1>Bienvenido a EventosFiltro</h1>
-            <p>Descubre los mejores eventos adaptados a tus preferencias</p>
-            <div class="buttons-container">
-                <a href="/login" class="btn-portada">Iniciar Sesión / Entrar</a>
-                <a href="/admin" class="btn-portada">Administrador</a>
-                <a href="EventPulse/index.html" class="btn-portada">Entrar como Invitado</a>
-            </div>
+            <a href="/" style="position: absolute; top: 20px; left: 20px; color: white; text-decoration: none;">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <h1>Panel de Administrador</h1>
+            <p>Gestiona los eventos y usuarios de la plataforma</p>
+            <form id="adminLoginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="adminEmail">Email:</label>
+                    <input type="email" id="adminEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">Contraseña:</label>
+                    <input type="password" id="adminPassword" name="password" required>
+                </div>
+                <div id="errorMessage" class="error-message" style="color: red; display: none;"></div>
+                <button type="submit" class="btn-primary">Acceder como Administrador</button>
+            </form>
         </div>
     </div>
     <script src="script.js"></script>
+    <script src="js/admin.js"></script>
 </body>
-</html>
+</html> 
